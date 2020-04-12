@@ -6,7 +6,7 @@
   * [IO流](./docs/notes/javaSe/Java中的IO流)
   * [函数式编程/stream](./docs/notes/javaSe/函数式编程&Stream)
   * [多线程基础](./docs/notes/javaSe/Java中的多线程)
-  * [正则表达式](./docs/notes/JavaSe/Java中的正则表达式)
+  * [正则表达式](./docs/notes/JavaSe/正则表达式)
   * [并发包(JUC)](./docs/notes/impor/JUC)
 
 
@@ -16,7 +16,6 @@
 
   * [类加载](./docs/notes/JVM/类加载)
   * [类加载&类加载器](./docs/notes/JVM/类加载&类加载器)
-
   * [内存模型](./docs/notes/JVM/内存)
   * [字节码简述](./docs/notes/JVM/字节码)
   * [垃圾回收](./docs/notes/JVM/垃圾回收)
