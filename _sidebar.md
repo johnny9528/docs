@@ -3,10 +3,10 @@
 
   * [反射](./docs/notes/javaSe/Java中的反射机制.md)
   * [时间日期](./docs/notes/javaSe/Java中的时间日期)
-  * [IO流](./docs/notes/JavaSe/java中的IO流)
+  * [IO流](./docs/notes/javaSe/Java中的IO流)
   * [函数式编程/stream](./docs/notes/javaSe/函数式编程&Stream)
-  * [多线程基础](./docs/notes/JavaSe/java中的多线程)
-  * [正则表达式](./docs/notes/JavaSe/java中的正则表达式)
+  * [多线程基础](./docs/notes/javaSe/Java中的多线程)
+  * [正则表达式](./docs/notes/JavaSe/Java中的正则表达式)
 
   * [并发包(JUC)](./docs/notes/impor/JUC)
 
