@@ -11,7 +11,6 @@
 
 
 * JavaWeb
-
 * JVM
 
   * [类加载](./docs/notes/JVM/类加载)
@@ -19,8 +18,16 @@
   * [内存模型](./docs/notes/JVM/内存)
   * [字节码简述](./docs/notes/JVM/字节码)
   * [垃圾回收](./docs/notes/JVM/垃圾回收)
-
 * 算法
 
+  * 算法基础
+
+    * [排序算法](./docs/notes/algorithm/算法基础/排序算法)
+    * [中位数和选择算法](./docs/notes/algorithm/算法基础/选择算法和中位数)
+  * 算法题解
+
+    * [lc416(递归)](./docs/notes/algorithm/题解/lc_416_递归)
+    * [lc424(滑动窗口)](./docs/notes/algorithm/题解/lc_424_滑动窗口)
+    * [lc523(巧用取余+hashmap)](./docs/notes/algorithm/题解/lc_523_取余+hashmap)
 * 设计模式
 
