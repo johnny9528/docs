@@ -30,7 +30,10 @@
     * [滑动窗口](./docs/notes/algorithm/题解/滑动窗口)
     * [二分](./docs/notes/algorithm/题解/二分)
     * [双指针](./docs/notes/algorithm/题解/双指针)
-    * [一般问题](./docs/notes/algorithm/题解/Gerenal)
+    * [深度/广度优先](./docs/notes/algorithm/题解/dfs_bfs)
+    * [链表操作](./docs/notes/algorithm/题解/链表)
+    * [一般问题](./docs/notes/algorithm/题解/general)
+
 
 
 
