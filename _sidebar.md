@@ -36,6 +36,8 @@
     * [回溯](./docs/notes/algorithm/forLet_new/回溯.md)
     * [贪心](./docs/notes/algorithm/forLet_new/贪心.md)
     * [一般问题](./docs/notes/algorithm/forLet_new/general.md)
+    * [面试金典题目](./docs/notes/algorithm/forLet_new/面试金典.md)
+    
 
 
 
