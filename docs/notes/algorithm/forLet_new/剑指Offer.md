@@ -155,6 +155,287 @@ class Solution {
 
 
 
+## 10-1. 斐波那契数列
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/fei-bo-na-qi-shu-lie-lcof/)
+
+```
+斐波那契数列由 0 和 1 开始，之后的斐波那契数就是由之前的两数相加而得出。
+答案需要取模 1e9+7（1000000007），如计算初始结果为：1000000008，请返回 1。
+
+输入：n = 5
+输出：5
+```
+
+### 分析
+
+简单动态规划
+
+### 实现
+
+```java
+class Solution {
+    public int fib(int n) {
+        if (n < 2) return n;
+        int first = 0;
+        int second = 1;
+        for (int i = 2; i <= n; i++) {
+            int temp = first + second;
+            first = second;
+            second = temp % 1000000007;
+        }
+        return second;
+    }
+}
+```
+
+
+
+## 10-2. 青蛙跳台阶问题
+
+### 题目描述
+
+```
+青蛙能跳一步或者两步， 求总的方式
+```
+
+### 分析
+
+简单dp，和上题一样
+
+### 实现
+
+```java
+class Solution {
+    public int numWays(int n) {
+        if (n <= 2) {
+            return n == 0 ? 1 : n;
+        }
+
+        int first = 1;
+        int second = 2;
+        int temp;
+        for (int i = 3; i <= n; i++) {
+            temp = second;
+            second = (second + first) % 1000000007;
+            first = temp;
+        }
+        return second;
+    }
+}
+```
+
+
+
+## 11. 旋转数组的最小数字
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/xuan-zhuan-shu-zu-de-zui-xiao-shu-zi-lcof/)
+
+```
+把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。输入一个递增排序的数组的一个旋转，输出旋转数组的最小元素。例如，数组 [3,4,5,1,2] 为 [1,2,3,4,5] 的一个旋转，该数组的最小值为1。
+输入：[3,4,5,1,2]
+输出：1
+```
+
+### 分析
+
+因为数组旋转，通过两个端找到中间，那么有一边一定是排好序的。会存在下面三种情况：
+
+* `nums[mid] < nums[right]` ， 中间值比右侧小，那么mid右侧一定是排好序的，右侧都是大于nums[mid]的，因此最小值一定在mid的左侧(可能就是mid)
+* `nums[mid] > nums[right]` 这种情况下，左侧一定是排好序的，但是由于有翻转， 最小值一定在mid右侧
+* 二者相等，不能得出什么结论，唯一结论是，最小值不是right，因为mid和right一样大。
+
+### 实现
+
+```java
+class Solution {
+    public int minArray(int[] numbers) {
+        int low = 0;
+        int high = numbers.length - 1;
+        while(low < high) {
+            int middle = low + (high - low) / 2;
+            if(numbers[middle] > numbers[high]) {
+                low = middle + 1;
+            }else if(numbers[middle] < numbers[high]) {
+                high = middle;
+            }else {
+                high -= 1;
+            }
+        }
+        return numbers[low];
+    }
+}
+```
+
+
+
+## 12. 矩阵中的路径
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/ju-zhen-zhong-de-lu-jing-lcof/)
+
+```
+请设计一个函数，用来判断在一个矩阵中是否存在一条包含某字符串所有字符的路径。路径可以从矩阵中的任意一格开始，每一步可以在矩阵中向左、右、上、下移动一格。如果一条路径经过了矩阵的某一格，那么该路径不能再次进入该格子。例如，在下面的3×4的矩阵中包含一条字符串“bfce”的路径（路径中的字母用加粗标出）。
+
+[["a","b","c","e"],
+["s","f","c","s"],
+["a","d","e","e"]]
+但矩阵中不包含字符串“abfb”的路径，因为字符串的第一个字符b占据了矩阵中的第一行第二个格子之后，路径不能再次进入这个格子。
+
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"
+输出：true
+```
+
+### 分析
+
+回溯算法。针对某一个起点，采用深度优先遍历寻找结果，找到就返回true，停止寻找，否则继续找。
+
+由于不能重复进入格子，需要一个used数组记录已经到达过的地方
+
+### 实现
+
+```java
+class Solution {
+    public boolean exist(char[][] board, String word) {
+        boolean[][] used = new boolean[board.length][board[0].length];
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (backTrack(board, i, j, word, 0, used)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean backTrack(char[][] board, int i, int j, String word, int index, boolean[][] used) {
+        if (i < 0 || i >= board.length || j < 0 || j >= board[0].length) {
+            // 超出边界， 返回false
+            return false;
+        }
+        if (used[i][j] == true) {
+            // 这个格子已经被用过了
+            return false;
+        }
+        if (board[i][j] != word.charAt(index)) {
+            // 当前的字符不等于对应的字符，不继续了，直接返回false
+            return false;
+        }
+        if (index == word.length() - 1) {
+            // ok, 找到一个正确的了
+            return true;
+        }
+
+        used[i][j] = true; // 标识当前格子被使用了
+		
+        // 向四个方向遍历，  || 有一个是true， 就会直接返回true
+        boolean isTrue = backTrack(board, i - 1, j, word, index + 1, used) || backTrack(board, i + 1, j, word, index + 1, used) ||
+                backTrack(board, i, j - 1, word, index + 1, used) || backTrack(board, i, j + 1, word, index + 1, used);
+
+        if (isTrue == false) {
+            // 如果 i, j 为起点找不到正确结果，需要将used设置回初始状态
+            used[i][j] = false;
+        }
+        return isTrue;    
+    }
+}
+```
+
+
+
+## 13。 机器人的运动范围
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/ji-qi-ren-de-yun-dong-fan-wei-lcof/)
+
+```
+地上有一个m行n列的方格，从坐标 [0,0] 到坐标 [m-1,n-1] 。一个机器人从坐标 [0, 0] 的格子开始移动，它每次可以向左、右、上、下移动一格（不能移动到方格外），也不能进入行坐标和列坐标的数位之和大于k的格子。例如，当k为18时，机器人能够进入方格 [35, 37] ，因为3+5+3+7=18。但它不能进入方格 [35, 38]，因为3+5+3+8=19。请问该机器人能够到达多少个格子？
+输入：m = 2, n = 3, k = 1
+输出：3
+```
+
+### 分析
+
+回溯， 但是本题隐藏的优化点是，只用计算向右和向下的值即可。
+
+### 实现
+
+```java
+class Solution {
+    public int movingCount(int m, int n, int k) {
+        int[][] visited = new int[m][n];
+        return helper(m, n, 0, 0, k, visited);
+    }
+    public int helper(int m, int n, int i, int j, int k, int[][] visited) {
+        if(i < 0 || i >= m || j < 0 || j >= n || visited[i][j] == 1) return 0;
+        int sum = getSumByBit(i) + getSumByBit(j);
+        if(sum > k) return 0;
+        visited[i][j] = 1;
+        return helper(m, n, i + 1, j, k, visited) + helper(m, n, i, j + 1, k, visited) + 1;
+    }
+    public int getSumByBit(int x) {
+        int sum = 0;
+        while(x != 0) {
+            sum += x % 10;
+            x = x / 10;
+        }
+        return sum;
+    }
+}
+```
+
+
+
+## 14. 减绳子
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/jian-sheng-zi-lcof/)
+
+```
+给你一根长度为 n 的绳子，请把绳子剪成整数长度的 m 段（m、n都是整数，n>1并且m>1），每段绳子的长度记为 k[0],k[1]...k[m-1] 。请问 k[0]*k[1]*...*k[m-1] 可能的最大乘积是多少？例如，当绳子的长度是8时，我们把它剪成长度分别为2、3、3的三段，此时得到的最大乘积是18。
+输入: 10
+输出: 36
+解释: 10 = 3 + 3 + 4, 3 × 3 × 4 = 36
+```
+
+### 分析
+
+比如说， 绳子长度为20， 那么划分方式有：
+
+* 减去1， 剩下19， 那么19要么不减了， 乘积为 19, 要么19继续划分， 乘积为 1 * (19划分的结果)
+* 减去2， 剩下18， 18要么不继续划分了，乘积为 36， 要么为 2 * (18划分的结果)
+* ...
+
+因此这是一个典型的递归树， 递归树可以用空间换时间
+
+采用dp
+
+### 实现
+
+```java
+class Solution {
+    public int cuttingRope(int n) {
+        int[] dp = new int[n + 1];
+
+        for (int i = 2; i <= n; i++) {
+            for (int j = 1; j < i; j++) {
+                dp[i] = Math.max(dp[i], Math.max(j * (i - j), j * dp[i - j]));
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+
+
 ## 18. 删除链表中的某个节点
 
 ### 描述
