@@ -436,6 +436,99 @@ class Solution {
 
 
 
+## 15. 二进制中1的个数
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/er-jin-zhi-zhong-1de-ge-shu-lcof/)
+
+```
+请实现一个函数，输入一个整数（以二进制串形式），输出该数二进制表示中 1 的个数。例如，把 9 表示成二进制是 1001，有 2 位是 1。因此，如果输入 9，则该函数输出 2。
+
+输入：00000000000000000000000000001011
+输出：3
+解释：输入的二进制串 00000000000000000000000000001011 中，共有三位为 '1'。
+
+```
+
+### 分析
+
+一直往左移动， 遇到1就加1
+
+### 实现
+
+```java
+public class Solution {
+    public int hammingWeight(int n) {
+        int count = 0;
+        for (int i = 0; i < 32; i++) {
+            if (((1 << i) & n) != 0) {
+                // 该位是1
+                count += 1;
+            }
+        }
+        return count;
+    }
+}
+```
+
+
+
+## 16. 数值的整数次方
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/shu-zhi-de-zheng-shu-ci-fang-lcof/)
+
+```
+实现函数double Power(double base, int exponent)，求base的exponent次方。不得使用库函数，同时不需要考虑大数问题。
+
+输入: 2.00000, 10
+输出: 1024.00000
+```
+
+### 分析
+
+典型的分治， 比如 1024次方，如果得出512的结果了，直接两个乘起来就可以
+
+### 实现
+
+```java
+class Solution {
+    public double myPow(double x, int n) {
+        if (n == 0) {
+            return 1.0;
+        }
+        if (n < 0) {
+            // 为了防止负数的时候整形溢出， 先拿出一个来
+            return calcu(1.0 / x, -n - 1) * (1.0 / x);
+        }
+        return calcu(x, n);
+    }
+
+    private double calcu(double x, long n) {
+        if (n == 0) {
+            return 1;
+        }
+        if (n == 1l) {
+            return x;
+        }
+        if ((n & 1) == 0) {
+            // 偶数
+            double subAns = calcu(x, n >> 1);
+            return subAns * subAns;
+        } else {
+            double subAns = calcu(x, n >> 1);
+            return subAns * subAns * x;
+        }
+    }
+}
+```
+
+
+
+
+
 ## 18. 删除链表中的某个节点
 
 ### 描述
@@ -477,6 +570,55 @@ class Solution {
             }
         }
         return preHeadDumpy.next;
+    }
+}
+```
+
+
+
+## 21. 调整数组顺序使得奇数在左边，偶数在右边
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/)
+
+```
+输入一个整数数组，实现一个函数来调整该数组中数字的顺序，使得所有奇数位于数组的前半部分，所有偶数位于数组的后半部分。
+```
+
+### 分析
+
+双指针，遇到都不满足的时候，换。有点像快排的思路
+
+### 实现
+
+```java
+class Solution {
+    public int[] exchange(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+
+        while (left < right) {
+            if (nums[left] % 2 == 0 && nums[right] % 2 == 1) {
+                // 左边是偶数，右边是奇数，需要换
+                int temp = nums[left];
+                nums[left] = nums[right];
+                nums[right] = temp;
+                left += 1;
+                right -= 1;
+            } else if (nums[left] % 2 == 1 && nums[right] % 2 == 1) {
+                // 左右都是奇数， 右边不动，等着换
+                left += 1;
+            } else if (nums[left] % 2 == 0 && nums[right] % 2 == 0) {
+                // 左右都是偶数， 左边不动，等着换
+                right -= 1;
+            } else {
+                // 左边奇数， 右边偶数， ok,没问题
+                left += 1;
+                right -= 1;
+            }
+        }
+        return nums;
     }
 }
 ```
@@ -567,6 +709,140 @@ class Solution {
     }
 }
 ```
+
+
+
+## 25. 合并排序链表
+
+### 实现
+
+```java
+class Solution {
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        ListNode preHead = new ListNode();
+        ListNode temp = preHead;
+        while (l1 != null && l2 != null) {
+            if (l1.val <= l2.val) {
+                temp.next = l1;
+                temp = temp.next;
+                l1 = l1.next;
+            } else {
+                temp.next = l2;
+                temp = temp.next;
+                l2 = l2.next;
+            }
+        }
+
+        if (l1 != null) {
+            temp.next = l1;
+        } else {
+            temp.next = l2;
+        }
+        return preHead.next;
+    }
+}
+```
+
+
+
+## 26. 树的子结构
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/shu-de-zi-jie-gou-lcof/)
+
+```
+输入两棵二叉树A和B，判断B是不是A的子结构。(约定空树不是任意一个树的子结构)
+
+B是A的子结构， 即 A中有出现和B相同的结构和节点值。
+
+例如:
+给定的树 A:
+
+给定的树 A:
+
+     3
+    / \
+   4   5
+  / \
+ 1   2
+给定的树 B：
+
+   4 
+  /
+ 1
+返回 true，因为 B 与 A 的一个子树拥有相同的结构和节点值。
+```
+
+### 分析
+
+如果确定了第一个开始的节点，那么就类似于判断两个树是否相同来判断了。简单递归
+
+这道题并不能进行优化
+
+### 实现
+
+```java
+class Solution {
+    public boolean isSubStructure(TreeNode A, TreeNode B) {
+        if(B == null || A == null) return false;
+        return helper(A, B) || isSubStructure(A.left, B) || isSubStructure(A.right, B);
+    }
+    public boolean helper(TreeNode A, TreeNode B) {
+        if(B == null) return true;
+        if(A == null || A.val != B.val) return false;
+        return helper(A.left, B.left) && helper(A.right, B.right);
+    }
+}
+```
+
+
+
+## 27. 二叉树镜像
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/er-cha-shu-de-jing-xiang-lcof/)
+
+```
+请完成一个函数，输入一个二叉树，该函数输出它的镜像。
+
+例如输入：
+
+     4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+镜像输出：
+
+     4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+```
+
+### 实现
+
+```java
+class Solution {
+    public TreeNode mirrorTree(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        
+        TreeNode left = root.left;
+        root.left = root.right;
+        root.right = left;
+        mirrorTree(root.left);
+        mirrorTree(root.right);
+        return root;
+    }
+}
+```
+
+
 
 
 
