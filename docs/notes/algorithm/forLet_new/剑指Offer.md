@@ -844,6 +844,220 @@ class Solution {
 
 
 
+## 28. 对称的二叉树
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/dui-cheng-de-er-cha-shu-lcof/submissions/)
+
+```
+请实现一个函数，用来判断一棵二叉树是不是对称的。如果一棵二叉树和它的镜像一样，那么它是对称的。
+
+例如，二叉树 [1,2,2,3,4,4,3] 是对称的。
+
+    1
+   / \
+  2   2
+ / \ / \
+3  4 4  3
+
+```
+
+### 实现
+
+```java
+class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        return root == null || helper(root.left, root.right);
+    }
+    public boolean helper(TreeNode root1, TreeNode root2) {
+        if(root1 == null && root2 == null) return true;
+        if(root1 == null || root2 == null || root1.val != root2.val) return false;
+        return helper(root1.left, root2.right) && helper(root1.right, root2.left);
+    }
+
+```
+
+
+
+## 29. 顺时针打印矩阵
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/shun-shi-zhen-da-yin-ju-zhen-lcof/)
+
+```
+输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每一个数字。
+输入：matrix = [[1,2,3,4],[5,6,7,8],[9,10,11,12]]
+输出：[1,2,3,4,8,12,11,10,9,5,6,7]
+```
+
+### 分析
+
+模拟这个过程即可
+
+需要注意的是，如果矩阵不是方针，循环一圈内部也需要判断是否需要停止
+
+### 实现
+
+```java
+class Solution {
+    public int[] spiralOrder(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) {
+            return new int[] {};
+        }
+        int index = 0;
+        int left = 0;
+        int top = 0;
+        int bottom = matrix.length - 1; 
+        int right = matrix[0].length - 1;
+        int[] ans = new int[(bottom + 1) * (right + 1)];
+
+        while (left <= right && top <= bottom) {
+            for (int j = left; j <= right; j++) {
+                ans[index] = matrix[top][j];
+                index += 1;
+            }
+            top += 1;
+            for (int i = top; i <= bottom; i++) {
+                ans[index] = matrix[i][right];
+                index += 1;
+            }
+            right -= 1;
+
+            // 执行了一半之后，此处需要判断一次，因为如果不是方针，可能就已经遍历完所有的了
+            if (left > right || top > bottom) {
+                break;
+            }
+
+            for (int j = right; j >= left; j--) {
+                ans[index] = matrix[bottom][j];
+                index += 1;
+            }
+            bottom -= 1;
+            for (int i = bottom; i >= top; i--) {
+                ans[index] = matrix[i][left];
+                index += 1;
+            }
+            left += 1;
+        }
+        return ans;
+    }
+}
+```
+
+
+
+## 32. 从上到下遍历树
+
+### 描述
+
+```
+  3
+   / \
+  9  20
+    /  \
+   15   7
+[3,9,20,15,7]
+```
+
+### 分析
+
+层序遍历，bfs
+
+### 实现
+
+```java
+class Solution {
+    public int[] levelOrder(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        List<Integer> list = new ArrayList<>();
+        while(queue.size() > 0) {
+            TreeNode topNode = queue.poll();
+            if(topNode == null) continue;
+            list.add(topNode.val);
+            queue.add(topNode.left);
+            queue.add(topNode.right);
+        }
+        int[] ans = new int[list.size()];
+        for(int i = 0; i < list.size(); i++) {
+            ans[i] = list.get(i);
+        }
+        return ans;
+    }
+}
+```
+
+
+
+## 32-3. 从上到下打印树3
+
+### 描述
+
+```
+请实现一个函数按照之字形顺序打印二叉树，即第一行按照从左到右的顺序打印，第二层按照从右到左的顺序打印，第三行再按照从左到右的顺序打印，其他行以此类推。
+
+[
+  [3],
+  [20,9],
+  [15,7]
+]
+```
+
+### 分析
+
+采用双向链表实现层序遍历即可
+
+### 实现
+
+```java
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> ans = new ArrayList<>();
+        if (root == null) {
+            return ans;
+        }
+
+        Deque<TreeNode> deque = new LinkedList<>();
+        deque.addLast(root);
+        int level = 1;
+
+        while (deque.isEmpty() == false) {
+            int count = deque.size();
+            List<Integer> list = new ArrayList<>(count);
+            if (level % 2 == 1) {
+                // 奇数层
+                for (int i = 1; i <= count; i++) {
+                    TreeNode first = deque.removeFirst();
+                    list.add(first.val);
+                    if (first.left != null) {
+                        deque.addLast(first.left);
+                    }
+                    if (first.right != null) {
+                        deque.addLast(first.right);
+                    }
+                }
+            } else {
+                for (int i = 1; i <= count; i++) {
+                    TreeNode first = deque.removeLast();
+                    list.add(first.val);
+                    if (first.right != null) {
+                        deque.addFirst(first.right);
+                    }
+                    if (first.left != null) {
+                        deque.addFirst(first.left);
+                    }
+                }
+            }
+            ans.add(list);
+            level += 1;
+        }
+        return ans;
+    }
+}
+```
+
 
 
 ## 52. 两个链表的第一个公共节点
