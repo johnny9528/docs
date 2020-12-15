@@ -1116,3 +1116,638 @@ public class Solution {
 }
 ```
 
+
+
+## 33. 二叉搜索树的后序遍历序列是否正确
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/er-cha-sou-suo-shu-de-hou-xu-bian-li-xu-lie-lcof/)
+
+```
+输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历结果。如果是则返回 true，否则返回 false。假设输入的数组的任意两个数字都互不相同。
+参考这个二叉树
+
+  	5
+    / \
+   2   6
+  / \
+ 1   3
+ 
+ 输入: [1,3,2,6,5]
+输出: true
+```
+
+### 分析
+
+如果一个数组是二叉搜索树的后序遍历。需要满足以下几个：
+
+* 数组的最后一个数字是根节点。
+* 从左往右，找到第一个大于根节点的元素，那么这个元素后面的元素都必须大于根节点。
+* 具体而言，从左往右扫描，如果第一次找到大于5的元素，6，那么6之后的元素必须都大于5.比如 `[1,2, 3, 6,4,5]`就是错的
+* 因此，可以从左往右找到第一个大于根节点的元素，从又往左找到第一个小于根节点的元素，如果这两个元素是挨着的，继续递归判断子树，否则直接返回false
+
+### 实现
+
+```java
+class Solution {
+    public boolean verifyPostorder(int[] postorder) {
+        return isRight(postorder, 0, postorder.length - 1);
+    }
+
+    private boolean isRight(int[] nums, int left, int right) {
+        if (left >= right) {
+            return true;
+        }
+
+        // 寻找index1 是第一个大于根节点元素的索引
+        int index1 = left;
+        while (nums[index1] < nums[right]) {
+            index1 += 1;
+        }
+
+        // index1 是第一个大于right的索引
+
+        int index2 = right - 1;
+        while (index2 >= left && nums[index2] > nums[right]) {
+            index2 -= 1;
+        }
+        // Index2是最后1个小于right的索引
+        
+        if (index1 != index2 + 1) {
+            // 如果要正确，index1和index2必须是挨着的
+            return false;
+        }
+		
+        // 递归判断子树是否正确
+        return isRight(nums, left, index2) && isRight(nums, index1, right - 1);
+
+    }
+}
+```
+
+
+
+## 34. 二叉树中路径和为某个值的路径
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing-lcof/)
+
+```
+输入一棵二叉树和一个整数，打印出二叉树中节点值的和为输入整数的所有路径。从树的根节点开始往下一直到叶节点所经过的节点形成一条路径
+给定如下二叉树，以及目标和 sum = 22，
+    		  5
+             / \
+            4   8
+           /   / \
+          11  13  4
+         /  \    / \
+        7    2  5   1
+
+[
+   [5,4,11,2],
+   [5,8,4,5]
+]
+```
+
+### 分析
+
+题目限定了，是根节点到叶子节点的路径(如果要求路径的结果集，不加这个限制条件，没法做，如果只求路径个数，可以不加这个限制条件)。
+
+回溯
+
+* 遇到一个节点，把该节点值加入到路径
+* 判断当前节点是否是根节点
+  * 是根节点，看路径和是否满足，满足则加入不满足则继续
+  * 不是根节点，往左走，往右走
+* 子树都已经走完，将当前节点从路径中删除，回溯
+* 由于二叉树天然的往下的顺序，不用used数组
+
+### 实现
+
+```java
+class Solution {
+    public List<List<Integer>> pathSum(TreeNode root, int sum) {
+        List<List<Integer>> ans = new ArrayList<>();
+        Deque<Integer> path = new LinkedList<>();
+        backTrack(root, ans, path, sum, 0);
+        return ans;
+    }
+
+    private void backTrack(TreeNode root, List<List<Integer>> ans, Deque<Integer> path, int sum, int preSum) {
+        if (root == null) {
+            return;
+        }
+        path.addLast(root.val);
+        preSum += root.val;
+
+        if (root.left == null && root.right == null) {
+            // 是叶子节点
+            if (preSum == sum) {
+                ans.add(new ArrayList(path));
+            }
+        } else {
+            backTrack(root.left, ans, path, sum, preSum);
+            backTrack(root.right, ans, path, sum, preSum);
+        }
+
+        path.removeLast();
+    }
+}
+```
+
+
+
+## 35. 复杂链表的复制
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/fu-za-lian-biao-de-fu-zhi-lcof/)
+
+```
+请实现 copyRandomList 函数，复制一个复杂链表。在复杂链表中，每个节点除了有一个 next 指针指向下一个节点，还有一个 random 指针指向链表中的任意节点或者 null。
+
+输入：head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+输出：[[7,null],[13,0],[11,4],[10,2],[1,0]]
+(题目不好描述，点开原题查看)
+```
+
+### 分析
+
+直接深度优先遍历即可，但是可能存在环， 因此需要一个标记，哪些已经构造过了。
+
+### 实现
+
+```java
+class Solution {
+    public Node copyRandomList(Node head) {
+        Map<Node, Node> used = new HashMap<>();
+        return dfs(head, used);
+    }
+
+    private Node dfs(Node head, Map<Node, Node> used) {
+        if (head == null) {
+            return null;
+        }
+        if (used.containsKey(head)) {
+            //已经构造过了, 直接返回结果
+            return used.get(head);
+        }
+
+
+        Node createdNode = new Node(head.val); // 复制该节点
+        used.put(head, createdNode);  // 加入集合中，后面遇到这个节点，直接返回
+
+        createdNode.next = dfs(head.next, used); // 构造他的下一个节点
+        createdNode.random = dfs(head.random, used); // 构造他的random节点
+        return createdNode;
+
+    }
+}
+```
+
+
+
+## 36. 二叉搜索树转为循环双向链表
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-lcof/)
+
+```
+输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的循环双向链表。要求不能创建任何新的节点，只能调整树中节点指针的指向。
+```
+
+### 分析
+
+跟转化成单链表类似，得到当前节点的左子树的头部和尾巴，以及右子树的头部和尾巴，然后首尾首尾相连即可
+
+### 实现
+
+```java
+class Solution {
+    public Node treeToDoublyList(Node root) {
+        Node[] ans = getHeadAndTail(root);
+        if (ans[0] == null || ans[1] == null) {
+            return ans[0];
+        }
+        
+        // 因为是循环链表，需要将整体的首尾相连
+        ans[1].right = ans[0];
+        ans[0].left = ans[1];
+        return ans[0];
+    }
+	
+    // 得到当前树构造后的头部和尾巴
+    private Node[] getHeadAndTail(Node root) {
+        if (root == null) {
+            return new Node[] {null, null};
+        }
+
+        Node[] ans = new Node[2];
+
+        Node[] leftAns = getHeadAndTail(root.left);
+        Node[] rightAns = getHeadAndTail(root.right);
+
+        root.left = null;
+        root.right = null;
+
+        if (leftAns[0] == null && rightAns[0] == null) {
+            // 意味着 左子树和右子树都为空，头部和尾巴都是root
+            ans[0] = root;
+            ans[1] = root;
+            return ans;
+        }
+
+        if (leftAns[0] == null) {
+            // 左子树为空
+            ans[0] = root; // 头部是root
+            root.right = rightAns[0];
+            rightAns[0].left = root;
+            ans[1] = rightAns[1]; // 尾巴是右子树的尾巴
+            return ans;
+        } 
+
+        if (rightAns[0] == null) {
+            // 右子树为空
+            ans[0] = leftAns[0]; // 头部是左边的头部
+            leftAns[1].right = root;
+            root.left = leftAns[1];
+            ans[1] = root; // 尾巴是root
+            return ans;
+        }
+
+        // 左边和右边都不为空
+        ans[0] = leftAns[0]; // 头部是左边的头部
+        leftAns[1].right = root;
+        root.left = leftAns[1];
+        root.right = rightAns[0];
+        rightAns[0].left = root;
+        ans[1] = rightAns[1]; // 尾巴是右边的尾巴
+
+        return ans;
+
+    }
+}
+```
+
+
+
+## 38. 字符串的排列
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/zi-fu-chuan-de-pai-lie-lcof/)
+
+```
+输入一个字符串，打印出该字符串中字符的所有排列。
+你可以以任意顺序返回这个字符串数组，但里面不能有重复元素。
+
+输入：s = "abc"
+输出：["abc","acb","bac","bca","cab","cba"]
+```
+
+### 分析
+
+我分析累了，经典的可能存在重复的回溯，先排序，再回溯
+
+### 实现
+
+```java
+class Solution {
+    public String[] permutation(String s) {
+        char[] string = s.toCharArray();
+        // 排序
+        Arrays.sort(string);
+
+        List<String> ans = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        boolean[] used = new boolean[s.length()];
+
+        backTrade(string, ans, sb, used);
+        return ans.toArray(new String[ans.size()]);
+    }
+
+    private void backTrade(char[] charArray, List<String> ans, StringBuilder sb, boolean[] used) {
+        if (sb.length() == charArray.length) {
+            // 得到一个结果
+            ans.add(sb.toString());
+            return;
+        }
+
+        for (int i = 0; i < charArray.length; i++) {
+            if (used[i] == true) {
+                // 已经被使用了
+                continue;
+            }
+
+            if (i > 0 && charArray[i] == charArray[i - 1] && used[i - 1] == false) {
+                //   aabc这种字符串如果已经找了 abc(第一个a)， 再找abc(第二个a)， 会存在重复，去掉这种重复
+                continue;
+            }
+
+            sb.append(charArray[i]); // 加入path
+            used[i] = true; // 标识被使用了
+            backTrade(charArray, ans, sb, used); // 找下一个
+            sb.deleteCharAt(sb.length() - 1); // 回溯
+            used[i] = false; // 标识为没有被使用
+        }
+    }
+}
+```
+
+
+
+## 39. 数组中超过一半的元素
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/shu-zu-zhong-chu-xian-ci-shu-chao-guo-yi-ban-de-shu-zi-lcof/)
+
+```
+数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。
+你可以假设数组是非空的，并且给定的数组总是存在多数元素。
+
+输入: [1, 2, 3, 2, 2, 2, 5, 4, 2]
+输出: 2
+```
+
+### 分析
+
+投票法， 不一定存在还需要验证.
+
+投票， 如果是当前候选人，票数加1， 如果不是，票数减一。最后还的票的一定是多于半数的
+
+### 实现
+
+```java
+class Solution {
+    public int majorityElement(int[] nums) {
+        int vote = 0;
+        int base = 0;
+        for(int num : nums) {
+            if(vote == 0) base = num;
+            if(num == base) {
+                vote += 1;
+            }else {
+                vote -= 1;
+            }
+            
+        }
+        return base;
+    }
+}
+```
+
+
+
+## 40. 最小的K个数
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/zui-xiao-de-kge-shu-lcof/)
+
+```
+输入整数数组 arr ，找出其中最小的 k 个数。例如，输入4、5、1、6、2、7、3、8这8个数字，则最小的4个数字是1、2、3、4。
+输入：arr = [3,2,1], k = 2
+输出：[1,2] 或者 [2,1]
+```
+
+### 分析
+
+一趟快排之后，会找到主元的索引， 这个key将数组划分为两部分，左边小于key， 右边大于key。
+
+如果key， 等于k，直接返回。如果key大于k, 在key左边继续一趟快排， 反之
+
+### 实现
+
+```java
+class Solution {
+    public int[] getLeastNumbers(int[] arr, int k) {
+        quickSortOnce(arr, 0, arr.length - 1, k);
+
+        int[] ans = new int[k];
+        for (int i = 0; i < k; i++) {
+            ans[i] = arr[i];
+        }
+
+        return ans;
+    }
+	
+    // 一趟快排， 注意是一趟，不是一次
+    private void quickSortOnce(int[] nums, int startIndex, int endIndex, int k) {
+        if (startIndex >= endIndex) {
+            return;
+        }
+
+        int key = nums[startIndex];
+        int left = startIndex;
+        int right = endIndex;
+
+        while (left < right) {
+
+            while (left < right && nums[right] >= key) {
+                right -= 1;
+            }
+            swap(nums, left, right);
+
+            while (left < right && nums[left] <= key) {
+                left += 1;
+            }
+            swap(nums, left, right);
+        }
+        
+        // 一趟快排结束，left是主元的位置
+
+        if (left == k) {
+            // ok， 找到了，返回
+            return;
+        } else if (left > k) {
+            // 在左边找
+            quickSortOnce(nums, startIndex, left - 1, k);
+        } else {
+            // 在右边继续找
+            quickSortOnce(nums, left + 1, endIndex, k);
+        }
+    } 
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+}
+```
+
+
+
+## 42. 连续子数字的最大和
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/lian-xu-zi-shu-zu-de-zui-da-he-lcof/)
+
+```
+输入一个整型数组，数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。
+要求时间复杂度为O(n)。
+
+输入: nums = [-2,1,-3,4,-1,2,1,-5,4]
+输出: 6
+解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
+```
+
+### 分析
+
+简单dp。`dp[i]` 是子数组最后一个元素是`nums[i]`的最大和。那么有
+
+* `dp[i - 1] > 0`  ，更新`dp[i] = dp[i - 1] + nums[i]`
+* 反之，`dp[i - 1]`对应 i来说是个累赘，直接不要`dp[i] = nums[i]`
+* 然后找最大值
+* 可以优化空间复杂度，但是处于好理解，就别优化了吧
+
+### 实现
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        if (nums.length == 0) {
+            return 0;
+        }
+        int len = nums.length;
+        int[] dp = new int[len];
+
+        dp[0] = nums[0];
+        int ans = dp[0];
+        for (int i = 1; i < len; i++) {
+            if (dp[i - 1] < 0) {
+                dp[i] = nums[i];
+            } else {
+                dp[i] = nums[i] + dp[i - 1];
+            }
+
+            ans = Math.max(ans, dp[i]);
+        }
+
+        return ans;
+
+    }
+}
+```
+
+
+
+### 43. 1-n中1的个数(H)
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/1nzheng-shu-zhong-1chu-xian-de-ci-shu-lcof/)
+
+```
+输入一个整数 n ，求1～n这n个整数的十进制表示中1出现的次数。
+例如，输入12，1～12这些整数中包含1 的数字有1、10、11和12，1一共出现了5次。
+
+输入：n = 12
+输出：5
+```
+
+### 分析
+
+找规律进行递归的题，建议记住即可，代码很简单
+
+f(n))函数的意思是1～n这n个整数的十进制表示中1出现的次数，将n拆分为两部分，最高一位的数字high和其他位的数字last，分别判断情况后将结果相加
+
+例子如n=1234，high=1, pow=1000, last=234
+
+可以将数字范围分成两部分1~999和1000~1234
+
+1~999这个范围1的个数是f(pow-1)
+1000~1234这个范围1的个数需要分为两部分：
+
+* 千分位是1的个数：千分位为1的个数刚好就是234+1(last+1)，注意，这儿只看千分位，不看其他位
+  其他位是1的个数：即是234中出现1的个数，为f(last)
+  所以全部加起来是f(pow-1) + last + 1 + f(last);
+
+例子如3234，high=3, pow=1000, last=234
+
+可以将数字范围分成两部分1~999，1000~1999，2000~2999和3000~3234
+
+1~999这个范围1的个数是f(pow-1)
+1000~1999这个范围1的个数需要分为两部分：
+
+* 千分位是1的个数：千分位为1的个数刚好就是pow，注意，这儿只看千分位，不看其他位
+  其他位是1的个数：即是999中出现1的个数，为f(pow-1)
+  2000~2999这个范围1的个数是f(pow-1)
+  3000~3234这个范围1的个数是f(last)
+  所以全部加起来是pow + high*f(pow-1) + f(last);
+
+### 实现
+
+```java
+class Solution {
+    public int countDigitOne(int n) {
+        if(n <= 0) return 0;
+        if(n <= 9) return 1;
+        String s = "" + n;
+        int high = s.charAt(0) - '0';
+        int pow = (int)Math.pow(10, s.length() - 1);
+        int last = n - high * pow;
+        if (high == 1) {
+            return countDigitOne(pow-1) + last + 1 + countDigitOne(last);
+        } else {
+            return pow + high*countDigitOne(pow-1) + countDigitOne(last);
+        }
+
+    }
+}
+```
+
+
+
+## 44. 数字序列中某一位的数字
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/shu-zi-xu-lie-zhong-mou-yi-wei-de-shu-zi-lcof/)
+
+```
+数字以0123456789101112131415…的格式序列化到一个字符序列中。在这个序列中，第5位（从下标0开始计数）是5，第13位是1，第19位是4，等等。
+
+请写一个函数，求任意第n位对应的数字。
+
+输入：n = 11
+输出：0
+```
+
+### 分析
+
+第一步，先定位在哪个区间， 比如 10-100， 100-1000， 1000-10000.
+
+0-9之间每个数字，占一个位子，10-99，每一个占两个，后面同理。
+
+比如11定位到10-99之间，11 减去9个位置，还剩两个，即11在10-99中的第2个位置，每个数字占两个位置，即11是数字10的后面一个，即0
+
+### 实现
+
+```java
+class Solution {
+    public int findNthDigit(int n) {
+        int base = 1;
+        long count = 9l;
+        long start = 1;
+        while(n > count) {
+            n -= count;
+            start *= 10;
+            base += 1;
+            count = start * 9 * base; 
+        }
+
+        // System.out.println("the is " + n);
+        long num = (n - 1) / base + start;
+        int extra = (n - 1) % base;
+        return Long.toString(num).charAt(extra) - '0';
+
+    }
+}
+```
+
