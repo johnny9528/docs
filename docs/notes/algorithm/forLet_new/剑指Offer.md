@@ -1841,3 +1841,194 @@ class Solution {
 }
 ```
 
+
+
+## 47. 礼物的最大价值
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/li-wu-de-zui-da-jie-zhi-lcof/)
+
+```
+在一个 m*n 的棋盘的每一格都放有一个礼物，每个礼物都有一定的价值（价值大于 0）。你可以从棋盘的左上角开始拿格子里的礼物，并每次向右或者向下移动一格、直到到达棋盘的右下角。给定一个棋盘及其上面的礼物的价值，请计算你最多能拿到多少价值的礼物？
+
+输入: 
+[
+  [1,3,1],
+  [1,5,1],
+  [4,2,1]
+]
+输出: 12
+解释: 路径 1→3→5→2→1 可以拿到最多价值的礼物。
+```
+
+### 分析
+
+动态规划，从右下角开始，记录每个点到右下角的最大收益即可
+
+### 实现
+
+```java
+class Solution {
+    public int maxValue(int[][] grid) {
+        if (grid == null || grid.length == 0) {
+            return 0;
+        }
+        int row = grid.length - 1;
+        int col = grid[0].length - 1;
+        
+        // 计算最后一行和最后一列
+        for (int i = row - 1; i >= 0; i--) {
+            grid[i][col] += grid[i + 1][col];
+        }
+        for (int j = col - 1; j >= 0; j--) {
+            grid[row][j] += grid[row][j + 1];
+        }
+
+        for (int i = row - 1; i >= 0; i--) {
+            for (int j = col - 1; j>= 0; j--) {
+                grid[i][j] = Math.max(grid[i + 1][j], grid[i][j + 1]) + grid[i][j];
+            }
+        }
+        return grid[0][0];
+    }
+}
+```
+
+
+
+
+
+## 48. 最长不含重复字符的字串
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/zui-chang-bu-han-zhong-fu-zi-fu-de-zi-zi-fu-chuan-lcof/)
+
+```
+请从字符串中找出一个最长的不包含重复字符的子字符串，计算该最长子字符串的长度。
+输入: "abcabcbb"
+输出: 3 
+解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。
+```
+
+### 分析
+
+双指针，维护一个window， 里面是不重复的元素， 采用set保存。往右扩展，如果重复，删除直到不重复
+
+### 实现
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+
+        int left = 0, right = 0;
+        Set<Character> window = new HashSet<>();
+        int ans = 0;
+
+        while (right < s.length()) {
+            // 
+            char c = s.charAt(right);
+            while (window.contains(c)) {
+                // 删除直到不重复
+                window.remove(s.charAt(left));
+                left += 1;       
+            }
+            window.add(c); // 加入
+            ans = Math.max(ans, window.size());
+            right += 1;
+        }
+        return ans;
+    }
+}
+```
+
+
+
+## 49. 丑数
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/chou-shu-lcof/)
+
+```
+我们把只包含质因子 2、3 和 5 的数称作丑数（Ugly Number）。求按从小到大的顺序的第 n 个丑数。
+输入: n = 10
+输出: 12
+解释: 1, 2, 3, 4, 5, 6, 8, 9, 10, 12 是前 10 个丑数。
+```
+
+### 分析
+
+分析了很多次了，看代码吧
+
+### 实现
+
+```java
+class Solution {
+    public int nthUglyNumber(int n) {
+        int[] dp = new int[n + 1];
+        dp[1] = 1;
+        int index1 = 1, index2 = 1, index3 = 1;
+
+        for (int i = 2; i <= n; i++) {
+            int next = Math.min(dp[index1] * 2, Math.min(dp[index2] * 3, dp[index3] * 5));
+            dp[i] = next;
+
+            if (next == dp[index1] * 2) {
+                index1 += 1;
+            }
+
+            if (next == dp[index2] * 3) {
+                index2 += 1;
+            }
+
+            if (next == dp[index3] * 5) {
+                index3 += 1;
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
+
+
+## 50. 第一个只出现一次的字符
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/di-yi-ge-zhi-chu-xian-yi-ci-de-zi-fu-lcof/)
+
+```
+在字符串 s 中找出第一个只出现一次的字符。如果没有，返回一个单空格。 s 只包含小写字母。
+s = "abaccdeff"
+返回 "b"
+
+s = "" 
+返回 " "
+```
+
+### 分析
+
+由于只包含小写字母，使用一个26的数组来记录出现的此处，然后找第一个适合的即可
+
+### 实现
+
+```java
+class Solution {
+    public char firstUniqChar(String s) {
+        int[] count = new int[26];
+        for (int i = 0; i < s.length(); i++) {
+            count[s.charAt(i) - 'a'] += 1;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            if (count[s.charAt(i) - 'a'] == 1) {
+                return s.charAt(i);
+            }
+        }
+        return ' ';
+    }
+}
+```
+
