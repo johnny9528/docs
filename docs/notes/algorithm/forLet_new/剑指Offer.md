@@ -2032,3 +2032,84 @@ class Solution {
 }
 ```
 
+
+
+## 52. 两个链表的第一个公关节点
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/liang-ge-lian-biao-de-di-yi-ge-gong-gong-jie-dian-lcof/)
+
+```
+输入两个链表，找出它们的第一个公共节点。
+```
+
+### 分析
+
+各自跑一轮，总能相遇(如果存在)， 道理是走了相同的路径，相同的速度，会到达相同的地方
+
+### 实现
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if (headA == null || headB == null) {
+            return null;
+        }
+        // 各自跑一轮，一定会相交
+        ListNode one = headA;
+        ListNode two = headB;
+
+        while (one != null && two != null) {
+            if (one == two) {
+                return one;
+            }
+
+            one = one.next;
+            two = two.next;
+        }
+
+        if (one == null) {
+            one = headB;
+            while (one != null) {
+                if (two == null) {
+                    two = headA;
+                }
+
+                if (one == two) {
+                    return one;
+                }
+                one = one.next;
+                two = two.next;
+            }
+        } else {
+            two = headA;
+            while (two != null) {
+                if (one == null) {
+                    one = headB;
+                }
+
+                if (one == two) {
+                    return one;
+                }
+                one = one.next;
+                two = two.next;
+            }
+        }
+
+        return null;
+    }
+}
+```
+
