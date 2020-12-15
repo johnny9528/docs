@@ -2546,3 +2546,233 @@ class Solution {
 ### 题目描述
 
 [链接](https://leetcode-cn.com/problems/nge-tou-zi-de-dian-shu-lcof/)
+
+```
+把n个骰子扔在地上，所有骰子朝上一面的点数之和为s。输入n，打印出s的所有可能的值出现的概率。
+你需要用一个浮点数数组返回答案，其中第 i 个元素代表这 n 个骰子所能掷出的点数集合中第 i 小的那个的概率。
+
+输入: 1
+输出: [0.16667,0.16667,0.16667,0.16667,0.16667,0.16667]
+```
+
+### 分析
+
+动态规划， `dp[i][j]`代表i个骰子， 和为j的个数。
+
+比如 4个筛子，总和为10， 需要前3个筛子，为4，5， 6， 7， 8， 9. 然后加起来即可
+
+### 实现
+
+```java
+class Solution {
+    public double[] dicesProbability(int n) {
+        int[][] dp = new int[n + 1][n * 6 + 1];
+
+        for (int i = 1; i <= 6; i++) {
+            dp[1][i] = 1;
+        }
+
+        for (int i = 2; i <= n; i++) {
+            for (int j = 1; j <= i * 6; j++) {
+                // 
+                for (int k = 1; k <= 6; k++) {
+                    if (j - k <= 0) {
+                        break;
+                    }
+                    dp[i][j] += dp[i - 1][j - k];
+                }
+            }
+        }
+
+        double[] ans = new double[n * 6 - n + 1]; 
+        double total = Math.pow(6, n); // 总的个数
+        for (int count = n; count <= n * 6; count++) {
+            ans[count - n] = dp[n][count] / total;
+        }
+        return ans;
+
+
+    }
+}
+```
+
+
+
+## 61. 扑克牌中的顺子
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/bu-ke-pai-zhong-de-shun-zi-lcof/)
+
+```
+从扑克牌中随机抽5张牌，判断是不是一个顺子，即这5张牌是不是连续的。2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王为 0 ，可以看成任意数字。A 不能视为 14。
+
+输入: [1,2,3,4,5]
+输出: True
+```
+
+### 分析
+
+先排序， 因为存在joker， 所以，找到第一个不为joker和最后一个，中间没有重复并且 两个差值小于5， 即满足条件
+
+### 实现
+
+```java
+class Solution {
+    public boolean isStraight(int[] nums) {
+        Arrays.sort(nums);
+        int joker = 0;
+        for (int i = 0; i < 4; i++) {
+            if (nums[i] == 0) {
+                joker += 1;
+            } else {
+                // 出现重复
+                if (nums[i] == nums[i + 1]) {
+                    return false;
+                }
+            }
+        }
+        return nums[4] - nums[joker] < 5;
+    }
+}
+```
+
+
+
+## 62. 圆圈中剩下的数字
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi-lcof/)
+
+```
+0,1,,n-1这n个数字排成一个圆圈，从数字0开始，每次从这个圆圈里删除第m个数字。求出这个圆圈里剩下的最后一个数字。
+
+例如，0、1、2、3、4这5个数字组成一个圆圈，从数字0开始每次删除第3个数字，则删除的前4个数字依次是2、0、4、1，因此最后剩下的数字是3。
+
+输入: n = 5, m = 3
+输出: 3
+```
+
+### 分析
+
+这道题的规律和数学我不是很懂，记住吧，有点玄学
+
+### 官方实现
+
+```java
+class Solution {
+    public int lastRemaining(int n, int m) {
+        if(n == 0) return 0;
+        int x = lastRemaining(n - 1, m);
+        return (m + x) % n;
+    }
+}
+```
+
+
+
+## 卖卖股票的最大收益
+
+### 题目描述
+
+[链接]()
+
+```
+假设把某股票的价格按照时间先后顺序存储在数组中，请问买卖该股票一次可能获得的最大利润是多少？
+输入: [7,1,5,3,6,4]
+输出: 5
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。
+     注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格。
+
+```
+
+### 分析
+
+记录当前值，之前买入的最小价格，根据如果现在卖出得到的收益，更新最大收益
+
+### 实现
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        if (prices.length == 0) {
+            return 0;
+        }
+        int minBuyPrice = prices[0];
+        int ans = 0;
+
+        for (int i = 1; i < prices.length; i++) {
+            // 如果卖出去
+            ans = Math.max(ans, prices[i] - minBuyPrice);
+
+            minBuyPrice = Math.min(minBuyPrice, prices[i]);
+        }
+        return ans;
+    }
+}
+```
+
+
+
+## 68. 二叉搜索树的最近公共祖先
+
+### 题目描述
+
+```
+给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。
+
+百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”
+
+输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
+输出: 6 
+解释: 节点 2 和节点 8 的最近公共祖先是 6。
+
+```
+
+### 分析
+
+如果在root两侧，直接返回，如果在同侧，递归同侧
+
+### 实现
+
+```java
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if(root == p || root == q || root == null) return root;
+        if(p.val > q.val) {
+            TreeNode temp = p;
+            p = q;
+            q = temp;
+        }
+        if(root.val > p.val && root.val < q.val) return root;
+        if(root.val < p.val) return lowestCommonAncestor(root.right, p, q);
+        return lowestCommonAncestor(root.left, p, q);
+    }
+}
+```
+
+## 68-2. 普通二叉树的公共祖先
+
+### 描述
+
+```
+和上面一样，但是是普通的二叉树
+```
+
+### 实现
+
+```java
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if(root == p || root == q || root == null) return root;
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+
+        if(left == null) return right;
+        if(right == null) return left;
+        return root;
+    }
+}
+```
+
