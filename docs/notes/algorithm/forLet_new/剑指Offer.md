@@ -2113,3 +2113,436 @@ public class Solution {
 }
 ```
 
+
+
+## 在排序数组中查找数字出现的个数
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/zai-pai-xu-shu-zu-zhong-cha-zhao-shu-zi-lcof/)
+
+```
+统计一个数字在排序数组中出现的次数。
+输入: nums = [5,7,7,8,8,10], target = 8
+输出: 2
+```
+
+### 分析
+
+用二分先找到一个值，然后有两种方式
+
+* 第一中，往左和往右逐个蔓延，一个一个找
+* 往左二分递归找，往右二分递归找。以往左为例，找中间值，如果等于目标值，那么mid右侧都是目标值，然后递归找mid左侧即可
+
+### 实现
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1;
+        int index = -1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (nums[mid] == target) {
+                index = mid;
+                break;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        
+        // 找到第一个目标值得位置
+
+        if (index == -1) {
+            return 0;
+        }
+
+        // index 分为左右两个部分
+        return 1 + getLeftCount(nums, 0, index - 1, target) + getRightCount(nums, index + 1, nums.length - 1, target);
+    }
+
+    // 已经知道right+1是目标值了，因为是排序数组，那么右侧如果有目标值，一定是连续得
+    private int getLeftCount(int[] nums, int left, int right, int target) {
+        if (left > right) {
+            return 0;
+        }
+
+        int mid = (left + right) / 2;
+        int ans = 0;
+        if (nums[mid] == target) {
+            // mid 右侧都是等于target
+            ans += (right - mid + 1);
+            ans += getLeftCount(nums, left, mid - 1, target);
+        } else {
+            // 在mid右侧找
+            ans += getLeftCount(nums, mid + 1, right, target);
+        }
+
+        return ans;
+    }
+
+    private int getRightCount(int[] nums, int left, int right, int target) {
+        if (left > right) {
+            return 0;
+        }
+
+        int mid = (left + right) / 2;
+        int ans = 0;
+
+        if (nums[mid] == target) {
+            ans += (mid - left + 1);
+            ans += getRightCount(nums, mid + 1, right, target);
+        } else {
+            ans += getRightCount(nums, left, mid - 1, target);
+        }
+
+        return ans;
+    }
+
+}
+```
+
+
+
+## 53. 0-n中缺失的数字
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/que-shi-de-shu-zi-lcof/)
+
+```
+一个长度为n-1的递增排序数组中的所有数字都是唯一的，并且每个数字都在范围0～n-1之内。在范围0～n-1内的n个数字中有且只有一个数字不在该数组中，请找出这个数字。
+输入: [0,1,2,3,4,5,6,7,9]
+输出: 8
+```
+
+### 分析
+
+因为数组已经排好序，正常情况下，一个萝卜一个坑， 索引为多少，数字就是多少， 采用二分
+
+### 实现
+
+```java
+class Solution {
+    public int missingNumber(int[] nums) {
+        int left = 0;int right = nums.length - 1;
+        while(left <= right) {
+            int middle = left + (right - left) / 2;
+            if(nums[middle] == middle) left = middle + 1;
+            else right = middle - 1;
+        }
+        return left;
+    }
+}
+```
+
+
+
+## 54. 二叉搜索树的第K大节点
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/er-cha-sou-suo-shu-de-di-kda-jie-dian-lcof/)
+
+```
+给定一棵二叉搜索树，请找出其中第k大的节点。
+输入: root = [3,1,4,null,2], k = 1
+   3
+  / \
+ 1   4
+  \
+   2
+输出: 4
+```
+
+### 分析
+
+二叉搜索树降序排序，是先递归右边。
+
+递归版本，采用全局变量，好理解，简单
+
+迭代版本，自己模拟这个过程
+
+### 实现
+
+```java
+class Solution {
+    int k;
+    int ans;
+    public int kthLargest(TreeNode root, int k) {
+        this.k = k;
+        dfs(root);
+        return ans;
+
+    }
+    public void dfs(TreeNode root) {
+        if(root == null) return;
+        // k -= 1;
+        dfs(root.right);
+        k -= 1;
+        if(k == 0)  {
+            ans = root.val;
+            return;
+        }
+        dfs(root.left);
+    }
+}
+
+//迭代版本
+class Solution {
+    public int kthLargest(TreeNode root, int k) {
+
+        Deque<TreeNode> stack = new LinkedList<>();
+
+        while (stack.size() > 0 || root != null) {
+            while (root != null) {
+                stack.push(root);
+                root = root.right;
+            }
+
+            TreeNode top = stack.pop();
+            k -= 1;
+            if (k == 0) {
+                return top.val;
+            }
+
+            root = top.left;
+        }
+
+        return -1;
+    }
+}
+```
+
+
+
+## 55. 二叉搜索树的深度
+
+### 描述
+
+[链接](https://leetcode-cn.com/problems/er-cha-shu-de-shen-du-lcof/)
+
+```
+输入一棵二叉树的根节点，求该树的深度。从根节点到叶节点依次经过的节点（含根、叶节点）形成树的一条路径，最长路径的长度为树的深度。
+
+例如：
+
+给定二叉树 [3,9,20,null,null,15,7]，
+
+    3
+   / \
+  9  20
+    /  \
+   15   7
+返回它的最大深度 3 。
+```
+
+### 分析
+
+简单递归
+
+### 实现
+
+```java
+class Solution {
+    public int maxDepth(TreeNode root) {
+        if(root == null) return 0;
+        return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+    }
+}
+```
+
+
+
+## 55-2. 平衡二叉树
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/ping-heng-er-cha-shu-lcof/)
+
+```
+输入一棵二叉树的根节点，判断该树是不是平衡二叉树。如果某二叉树中任意节点的左右子树的深度相差不超过1，那么它就是一棵平衡二叉树。
+  3
+   / \
+  9  20
+    /  \
+   15   7
+   
+ 返回 true 。
+```
+
+### 分析
+
+递归，找左边和右边的深度。如果左边或者右边不是平衡二叉树，返回-1来标识
+
+### 实现
+
+```java
+class Solution {
+    boolean isRight = true;
+    public boolean isBalanced(TreeNode root) {
+        getLength(root);
+        return isRight;
+    }
+    public int getLength(TreeNode root) {
+        if(root == null) return 0;
+        int L = getLength(root.left);
+        int R = getLength(root.right);
+        if(L == R || L == R - 1 || L == R + 1) return Math.max(L, R) + 1;
+        isRight = false;
+        return -1;
+    }
+}
+```
+
+
+
+## 56. 数组中出现一次的两个数字
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-lcof/)
+
+```
+一个整型数组 nums 里除两个数字之外，其他数字都出现了两次。请写程序找出这两个只出现一次的数字。要求时间复杂度是O(n)，空间复杂度是O(1)。
+输入：nums = [4,1,4,6]
+输出：[1,6] 或 [6,1]
+```
+
+### 分析
+
+异或再进行分组，比较特殊，记住吧
+
+### 实现
+
+```java
+class Solution {
+    public int[] singleNumbers(int[] nums) {
+        int x = 0;
+        for (int num : nums) {
+            x = x ^ num;
+        }
+
+        int diff = 1;
+        while ((diff & x) == 0) {
+            diff = diff << 1;
+        }
+
+        // 利用diff分组
+        int first = 0;
+        for (int num : nums) {
+            if ((num & diff) == 0) {
+                first = first ^ num;
+            }
+        }
+
+        int second = x ^ first;
+        return new int[] {first, second};
+    }
+}
+```
+
+
+
+## 57. 和为s的两个数字
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/he-wei-sde-liang-ge-shu-zi-lcof/)
+
+```
+输入一个递增排序的数组和一个数字s，在数组中查找两个数，使得它们的和正好是s。如果有多对数字的和等于s，则输出任意一对即可。
+ 输入：nums = [2,7,11,15], target = 9
+输出：[2,7] 或者 [7,2]
+```
+
+### 分析
+
+因为已经排序，两个指针，一直寻找即可
+
+### 实现
+
+```java
+
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1;
+        while(left < right) {
+            if(nums[left] + nums[right] == target) {
+                int[] ans = new int[2];
+                ans[0] = nums[left];
+                ans[1] = nums[right];
+                return ans;
+            };
+            if(nums[left] + nums[right] > target) right -= 1;
+            else left += 1;
+        }
+        return new int[] {};
+    }
+}
+```
+
+
+
+## 57-2. 和为s的连续正数序列
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/)
+
+```
+输入一个正整数 target ，输出所有和为 target 的连续正整数序列（至少含有两个数）。
+
+序列内的数字由小到大排列，不同序列按照首个数字从小到大排列。
+
+输入：target = 15
+输出：[[1,2,3,4,5],[4,5,6],[7,8]]
+```
+
+### 分析
+
+滑动窗口， 如果windom中和小于target， 往右滑动，否则左边往右滑动。等于则加入结果集
+
+### 实现
+
+```java
+class Solution {
+    public int[][] findContinuousSequence(int target) {
+        List<int[]> ans = new ArrayList<>();
+        int left = 1;
+        int right = 2;
+
+        while (left < target / 2 + 1) {
+            int sum = (right - left + 1) * (left + right) / 2;
+            if (sum == target) {
+                int[] res = new int[right - left + 1];
+                for (int i = left; i <= right; ++i) {
+                    res[i - left] = i;
+                }
+                ans.add(res);
+                left += 1;
+            } else if (sum < target) {
+                right += 1;
+            } else if (sum > target) {
+                left += 1;
+            }
+        }
+
+        
+        return ans.toArray(new int[ans.size()][]);
+
+    }
+}
+```
+
+
+
+## 60. n个骰子的点数
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/nge-tou-zi-de-dian-shu-lcof/)
