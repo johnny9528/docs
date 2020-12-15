@@ -1751,3 +1751,93 @@ class Solution {
 }
 ```
 
+
+
+## 45. 把数组排成最小的数
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/ba-shu-zu-pai-cheng-zui-xiao-de-shu-lcof/)
+
+```
+输入一个非负整数数组，把数组里所有数字拼接起来排成一个数，打印能拼接出的所有数字中最小的一个。
+
+输入: [10,2]
+输出: "102"
+
+输入: [3,30,34,5,9]
+输出: "3033459"
+```
+
+### 分析
+
+自定义一个排序， 因为是字符串的拼接， x和y拼接有两种可能， x + y 和 y + x，隐因此只需要利用这个规则排序即可
+
+### 实现
+
+```java
+class Solution {
+    public String minNumber(int[] nums) {
+        String[] strs = new String[nums.length];
+        for (int i = 0; i < nums.length; i++) {
+            strs[i] = "" + nums[i];
+        }
+        Arrays.sort(strs, (x, y) -> {
+            return (x + y).compareTo(y + x);
+        });
+
+        // System.out.println(Arrays.toString(strs));
+        StringBuilder sb = new StringBuilder();
+        for (String s : strs) {
+            sb.append(s);
+        }
+        return sb.toString();
+    }
+}
+```
+
+
+
+## 46.把数字翻译成字符串
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/ba-shu-zi-fan-yi-cheng-zi-fu-chuan-lcof/)
+
+```
+给定一个数字，我们按照如下规则把它翻译为字符串：0 翻译成 “a” ，1 翻译成 “b”，……，11 翻译成 “l”，……，25 翻译成 “z”。一个数字可能有多个翻译。请编程实现一个函数，用来计算一个数字有多少种不同的翻译方法。
+输入: 12258
+输出: 5
+解释: 12258有5种不同的翻译，分别是"bccfi", "bwfi", "bczi", "mcfi"和"mzi"
+```
+
+### 分析
+
+典型dp，可能需要注意的是0的影响。`dp[i]` 是截至当前字符的翻译方式的个数。那么有下面几种情况：
+
+* i位置的字符，自己单独翻译，那么`dp[i] = dp[i - 1]`
+* i位置字符和i-1之间字符一起翻译
+  * 位置i-1的字符是0， 不能一起翻译,比如 02
+  * 否则，两个数字的值大于26不能一起翻译， 比如32
+  * 其余情况， `dp[i] += dp[i - 2]`
+
+### 实现
+
+```java
+class Solution {
+    public int translateNum(int num) {
+        String s = Integer.toString(num);
+        if(s.length() <= 1) return s.length();
+        int[] dp = new int[s.length() + 1];
+        dp[0] = 1;dp[1] = 1;
+        for(int i = 2; i <= s.length(); i++) {
+            dp[i] = dp[i - 1];
+            String num1 = s.substring(i - 2, i);
+            if(num1.charAt(0) != '0' && Integer.valueOf(num1) < 26) dp[i] += dp[i - 2];
+        }
+
+        return dp[dp.length - 1];
+    }
+}
+```
+
