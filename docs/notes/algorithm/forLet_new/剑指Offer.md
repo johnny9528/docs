@@ -77,6 +77,48 @@ class Solution {
 
 
 
+## 5. 替换空格
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/ti-huan-kong-ge-lcof/)
+
+```
+请实现一个函数，把字符串 s 中的每个空格替换成"%20"。
+输入：s = "We are happy."
+输出："We%20are%20happy."
+```
+
+### 分析
+
+一次遍历即可，可以用字符数组，也可以用stringBuilder
+
+### 实现
+
+```java
+class Solution {
+    public String replaceSpace(String s) {
+        int length = s.length();
+        char[] array = new char[length * 3];
+        int size = 0;
+        for (int i = 0; i < length; i++) {
+            char c = s.charAt(i);
+            if (c == ' ') {
+                array[size++] = '%';
+                array[size++] = '2';
+                array[size++] = '0';
+            } else {
+                array[size++] = c;
+            }
+        }
+        String newStr = new String(array, 0, size);
+        return newStr;
+    }
+}
+```
+
+
+
 ## 6. 从尾到头打印链表
 
 ### 描述
@@ -119,7 +161,7 @@ class Solution {
 
 
 
-## 6. 根据前序和中序重建二叉树
+## 7. 根据前序和中序重建二叉树
 
 ### 描述
 
@@ -150,6 +192,58 @@ class Solution {
         root.right = buileSubTree(pre, ino, i + index - m + 1, j, index + 1, n);
         return root;
     } 
+}
+```
+
+
+
+## 9. 两个栈实现队列
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/yong-liang-ge-zhan-shi-xian-dui-lie-lcof/)
+
+```
+用两个栈实现一个队列。队列的声明如下，请实现它的两个函数 appendTail 和 deleteHead ，分别完成在队列尾部插入整数和在队列头部删除整数的功能。(若队列中没有元素，deleteHead 操作返回 -1 )
+
+输入：
+["CQueue","appendTail","deleteHead","deleteHead"]
+[[],[3],[],[]]
+输出：[null,null,3,-1]
+```
+
+### 分析
+
+第一个栈用于入栈，第二个用于出栈。出栈的时候， 如果第二个栈不为空，直接返回top， 如果为空，将第一个栈的元素全部倾倒到第二个栈(出的时候，第二个栈实际上就是个队列)
+
+### 实现
+
+```java
+class CQueue {
+
+    Deque<Integer> in_stack;
+    Deque<Integer> out_stack;
+
+    public CQueue() {
+        in_stack = new LinkedList<>();
+        out_stack = new LinkedList<>();
+
+    }
+    
+    public void appendTail(int value) {
+        in_stack.push(value);
+
+    }
+    
+    public int deleteHead() {
+        if (out_stack.isEmpty()) {
+            while (in_stack.isEmpty() == false) {
+                out_stack.push(in_stack.pop());
+            }
+        }
+
+        return out_stack.isEmpty() ? -1 : out_stack.pop();
+    }
 }
 ```
 
@@ -526,6 +620,62 @@ class Solution {
 ```
 
 
+
+## 17. 打印从1到最大的n位数
+
+### 题目描述
+
+```
+输入数字 n，按顺序打印出从 1 到最大的 n 位十进制数。比如输入 3，则打印出 1、2、3 一直到最大的 3 位数 999。
+输入: n = 1
+输出: [1,2,3,4,5,6,7,8,9]
+```
+
+### 分析
+
+由于可能存在大数，因此不能直接用int去加。
+
+其实就是全排列的变式， 比如11个数字，那么就是0到9的全排列，并且允许重复。
+
+### 实现
+
+```java
+class Solution {
+    public List<String> printNumbers(int n) {
+        List<String> ans = new ArrayList<>();
+        char[] charArray = new char[n];
+
+        dfs(ans, charArray, 0, n);
+        System.out.println(ans);
+        return ans;
+    }
+
+    private void dfs(List<String> ans, char[] charArray, int count, int n) {
+        if (count == n) {
+            String temp = getString(charArray);
+            if (!"".equals(temp)) {
+                // 剔除全0的值
+                ans.add(temp);
+            } 
+            return;
+        }
+
+        for (int i = 0; i <= 9; i++) {
+            charArray[count] = (char)('0' + i);
+            dfs(ans, charArray, count + 1, n);
+        }
+    }
+
+    // 构造字符串，删除开始的0， 如果全是0，则返回""
+    private String getString(char[] charArray) {
+        int index = 0;
+        while (index < charArray.length && charArray[index] == '0') {
+            index += 1;
+        }
+        return new String(charArray, index, charArray.length - index);
+    }
+}
+```
 
 
 
@@ -1057,6 +1207,97 @@ class Solution {
     }
 }
 ```
+
+
+
+## 37. 序列化二叉树并反序列化
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/xu-lie-hua-er-cha-shu-lcof/)
+
+```
+你可以将以下二叉树：
+
+    1
+   / \
+  2   3
+     / \
+    4   5
+
+只要能反序列化回来即可
+```
+
+### 分析
+
+序列化的时候，按照层序遍历的思路，只要不为空，将该节点值加入字符串，然后左右进入队列。如果位空，用“null"标识为空。
+
+上述为序列化为 `"1,2,3, null, null,4,5,null,null,null,null"`
+
+反序列话的时候， 先构造1， 然后1的左和右指向2和3， 然后构造2， 2的左和右指向两个null， 然后构造3， 指向4和5， 然后构造4， 指向两个空，然后构造5，指向两个空
+
+### 实现
+
+```java
+public class Codec {
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        if (root == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        Deque<TreeNode> deque = new LinkedList<>();
+        deque.offer(root);
+        while (deque.size() > 0) {
+            TreeNode topNode = deque.pop();
+            if (topNode != null) {
+                sb.append("" + topNode.val + ",");
+                deque.offer(topNode.left);
+                deque.offer(topNode.right);
+            } else {
+                // 如果为空，用一个null标识其为空， 反序列化遇到空，直接跳过即可
+                sb.append("null,");
+            }
+        }
+        String str = sb.toString();
+        return str.substring(0, str.length() - 1);
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        if ("".equals(data)) {
+            return null;
+        }
+
+        String[] dataArray = data.split(",");
+        TreeNode root = new TreeNode(Integer.parseInt(dataArray[0]));
+        Deque<TreeNode> deque = new LinkedList<>();
+        deque.offer(root);
+
+        int index = 1;
+        while (deque.size() > 0) {
+            TreeNode topNode = deque.pop();
+            if ("null".equals(dataArray[index]) == false) {
+                // 遇到空跳过即可
+                TreeNode left = new TreeNode(Integer.parseInt(dataArray[index]));
+                topNode.left = left;
+                deque.offer(left);
+            }
+            index += 1;
+            if ("null".equals(dataArray[index]) == false) {
+                TreeNode right = new TreeNode(Integer.parseInt(dataArray[index]));
+                topNode.right = right;
+                deque.offer(right);
+            }
+            index += 1;
+        }
+        return root;
+    }
+}
+```
+
+
 
 
 
