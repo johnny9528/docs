@@ -63,10 +63,13 @@ class Solution {
         int row = matrix.length - 1;
         while(col < matrix[0].length && row >= 0) {
             if(matrix[row][col] > target) {
+                // 如果大于目标值，往上移动
                 row -= 1;
             }else if(matrix[row][col] < target) {
+                // 如果小于目标值， 往右移动
                 col += 1;
             }else {
+                // 找到目标值了
                 return true;
             }
         }
@@ -723,6 +726,80 @@ class Solution {
     }
 }
 ```
+
+
+
+## 19. 正则表达式匹配(H)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/zheng-ze-biao-da-shi-pi-pei-lcof/)
+
+```
+请实现一个函数用来匹配包含'. '和'*'的正则表达式。模式中的字符'.'表示任意一个字符，而'*'表示它前面的字符可以出现任意次（含0次）。在本题中，匹配是指字符串的所有字符匹配整个模式。例如，字符串"aaa"与模式"a.a"和"ab*ac*a"匹配，但与"aa.a"和"ab*a"均不匹配。
+
+输入:
+s = "aab"
+p = "c*a*b"
+输出: true
+解释: 因为 '*' 表示零个或多个，这里 'c' 为 0 个, 'a' 被重复一次。因此可以匹配字符串 "aab"。
+
+```
+
+### 分析
+
+hard， 别理解了，记住思路和细节吧，即使理解了，也容易忘掉细节。
+
+动态规划
+
+### 分析
+
+### 实现
+
+```java
+class Solution {
+    public boolean isMatch(String s, String p) {
+        int m = s.length();
+        int n = p.length();
+
+        boolean[][] dp = new boolean[m + 1][n + 1];
+        dp[0][0] = true;
+
+        for (int i = 0; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (p.charAt(j - 1) != '*') {
+                    if (isOk(s, p, i, j)) {
+                        dp[i][j] = dp[i - 1][j - 1];
+                    }
+                } else {
+                    // * 表示0个
+                    dp[i][j] = dp[i][j - 2];
+                    if (isOk(s, p, i, j - 1)) {
+                        dp[i][j] |= dp[i - 1][j];
+                    }
+                }
+            }
+        }
+        return dp[m][n];
+
+
+    }
+    private boolean isOk(String s, String p, int i, int j) {
+        if (i == 0) {
+            return false;
+        }
+        if (p.charAt(j - 1) == '.') {
+            return true;
+        }
+
+        return s.charAt(i - 1) == p.charAt(j - 1);
+    }
+
+    
+}
+```
+
+
 
 
 
@@ -1823,6 +1900,83 @@ class Solution {
 
 
 
+## 41. 数据流中的中位数
+
+### 题目描述
+
+[链接]()
+
+```
+如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。
+
+例如，
+
+[2,3,4] 的中位数是 3
+
+[2,3] 的中位数是 (2 + 3) / 2 = 2.5
+
+设计一个支持以下两种操作的数据结构：
+
+void addNum(int num) - 从数据流中添加一个整数到数据结构中。
+double findMedian() - 返回目前所有元素的中位数。
+```
+
+### 分析
+
+因为是数据流中求中位数，数据一直在增多。采用一个大根堆，存储中位数左边的元素，小根堆，存储中位数右边的元素。
+
+中位数，如果是偶数，就是两个根节点相加除以2， 如果是奇数，就是大根堆的根节点.
+
+采用优先级队列实现
+
+### 实现
+
+```java
+class MedianFinder {
+
+    PriorityQueue<Integer> maxheap;
+    PriorityQueue<Integer> minheap;
+    int count;
+
+    /** initialize your data structure here. */
+    public MedianFinder() {
+        count = 0;
+        maxheap = new PriorityQueue<>((x, y) -> y - x);
+        minheap = new PriorityQueue<>();
+    }
+    
+    public void addNum(int num) {
+        count += 1;
+        if (count == 1 || count == 2) {
+            maxheap.offer(num);
+        } else {
+            if (num > maxheap.peek()) {
+                // 
+                minheap.offer(num);
+            } else {
+                maxheap.offer(num);
+            }
+        }
+
+        if (maxheap.size() > minheap.size() + 1) {
+            minheap.offer(maxheap.poll());
+        } else if (maxheap.size() < minheap.size()) {
+            maxheap.offer(minheap.poll());
+        }
+    }
+    
+    public double findMedian() {
+        if (count % 2 == 0) {
+            return (maxheap.peek() + minheap.peek()) * 0.5;
+        } else {
+            return maxheap.peek() * 1.0;
+        }
+    }
+}
+```
+
+
+
 ## 42. 连续子数字的最大和
 
 ### 描述
@@ -1876,9 +2030,7 @@ class Solution {
 }
 ```
 
-
-
-### 43. 1-n中1的个数(H)
+## 43. 1-n中1的个数(H)
 
 ### 描述
 
@@ -2272,6 +2424,99 @@ class Solution {
     }
 }
 ```
+
+
+
+## 51. 数组中的逆序对
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/shu-zu-zhong-de-ni-xu-dui-lcof/)
+
+```
+在数组中的两个数字，如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。输入一个数组，求出这个数组中的逆序对的总数。
+
+输入: [7,5,6,4]
+输出: 5
+```
+
+### 分析
+
+如果一个数之前已经是排好序了。比如 `[3， 4，7，8，9, 6]`
+
+要求6之前的逆序对，只需要找到第一个大于6的数字，即7， 然后之后的都能构成逆序对，3个。
+
+因此采用归并排序。找到中点，对左右进行归并排序，返回各自的逆序对的个数，同时归并的时候，找到格外的个数
+
+### 实现
+
+```java
+class Solution {
+    public int reversePairs(int[] nums) {
+        int[] temp = new int[nums.length];
+        return getCount(nums, 0, nums.length - 1, temp);
+    }
+
+    private int getCount(int[] nums, int left, int right, int[] temp) {
+        if (left >= right) {
+            return 0;
+        }
+
+        int mid = (left + right) / 2;
+        int leftCount = getCount(nums, left, mid, temp);
+        int rightCount = getCount(nums, mid + 1, right, temp);
+
+        if (nums[mid] <= nums[mid + 1]) {
+            // 已经全部有序了
+            return leftCount + rightCount;
+        }
+
+        // 归并排序并返回额外的个数
+        int extraCount = mergeSortAndGetCount(nums, left, mid, right, temp);
+        return leftCount + rightCount + extraCount;
+
+    }
+
+    private int mergeSortAndGetCount(int[] nums, int left, int mid, int right, int[] temp) {
+
+        int index = left;
+        int i = left;
+        int j = mid + 1;
+        int count = 0;
+        while (i <= mid && j <= right) {
+            if (nums[i] <= nums[j]) {
+                // 
+                temp[index] = nums[i];
+                index += 1;
+                i += 1;
+            } else {
+                temp[index] = nums[j];
+                count += (mid - i + 1);
+                index += 1;
+                j += 1;
+            }
+        }
+
+        while (i <= mid) {
+            temp[index] = nums[i];
+            index += 1;
+            i += 1;
+        }
+        while (j <= right) {
+            temp[index] = nums[j];
+            index += 1;
+            j += 1;
+        }
+
+        for (i = left; i <= right; i++) {
+            nums[i] = temp[i];
+        }
+        return count;
+    }
+}
+```
+
+
 
 
 
@@ -2779,6 +3024,149 @@ class Solution {
     }
 }
 ```
+
+
+
+## 59. 滑动窗口的最大值
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/hua-dong-chuang-kou-de-zui-da-zhi-lcof/)
+
+```
+给定一个数组 nums 和滑动窗口的大小 k，请找出所有滑动窗口里的最大值。
+输入: nums = [1,3,-1,-3,5,3,6,7], 和 k = 3
+输出: [3,3,5,5,6,7] 
+解释: 
+
+  滑动窗口的位置                最大值
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+
+```
+
+### 分析
+
+构造一个双向，保证里面是排序的，也可以直接使用优先级队列，然后动态更新这个双向链表即可
+
+### 实现
+
+```java
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        if (nums == null || nums.length == 0) {
+            return new int[] {};
+        }
+
+        Deque<Integer> deque = new LinkedList<>();
+        int[] ans = new int[nums.length - k + 1];
+        int index = 1;
+
+        // 构造窗口
+        int max = 0;
+        for (int i = 0; i < k; i++) {
+            max = getMaxAndRemoveLessThanNew(deque, i, k, nums);
+        }
+        // System.out.println(deque);
+        ans[0] = max;
+        for (int i = k; i < nums.length; i++) {
+            max = getMaxAndRemoveLessThanNew(deque, i, k, nums);
+            ans[index] = max;
+            index += 1;
+        }
+        return ans;
+
+    }
+
+    private int getMaxAndRemoveLessThanNew(Deque<Integer> deque, int index, int k, int[] nums) {
+        int insertValue = nums[index];
+        while (deque.size() > 0 && (index - k) == deque.getLast()) {
+            deque.removeLast();
+        }
+
+        while (deque.size() > 0 && nums[deque.getFirst()] <= insertValue) {
+            deque.removeFirst();
+        }
+        deque.addFirst(index);
+        // System.out.println(deque);
+        return nums[deque.getLast()];
+    }
+}
+```
+
+
+
+## 59-2. 队列的最大值
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/dui-lie-de-zui-da-zhi-lcof/)
+
+```
+请定义一个队列并实现函数 max_value 得到队列里的最大值，要求函数max_value、push_back 和 pop_front 的均摊时间复杂度都是O(1)。
+
+若队列为空，pop_front 和 max_value 需要返回 -1
+
+输入: 
+["MaxQueue","push_back","push_back","max_value","pop_front","max_value"]
+[[],[1],[2],[],[],[]]
+输出: [null,null,null,2,1,2]
+
+```
+
+### 分析
+
+和上一题一样，需要额外一个双向链表，排好序的，来进行最大值的保存
+
+### 实现
+
+```java
+class MaxQueue {
+    Deque<Integer> sort_stack;
+    Deque<Integer> value_stack;
+
+    public MaxQueue() {
+        sort_stack = new LinkedList<>();
+        value_stack = new LinkedList<>();
+    }
+    
+    public int max_value() {
+        if (value_stack.size() == 0) {
+            return -1;
+        }
+        return sort_stack.getLast();
+    }
+    
+    public void push_back(int value) {
+        value_stack.offer(value);
+
+        while (sort_stack.size() > 0 && sort_stack.getFirst() <= value) {
+            sort_stack.removeFirst();
+        }
+        sort_stack.addFirst(value);
+    }
+    
+    public int pop_front() {
+        if (value_stack.size() == 0) {
+            return -1;
+        }
+
+        int value = value_stack.pop();
+
+        if (sort_stack.size() > 0 && sort_stack.getLast() == value) {
+            sort_stack.removeLast();
+        }
+        return value;
+    }
+}
+```
+
+
 
 
 
