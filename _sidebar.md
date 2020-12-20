@@ -4,8 +4,10 @@
 
   * 算法基础
 
-    * [排序算法](./docs/notes/algorithm/算法基础/排序算法)
-    * [中位数和选择算法](./docs/notes/algorithm/算法基础/选择算法和中位数)
+    * [排序算法](./docs/notes/algorithm/算法基础/排序算法.md)
+    * [中位数和选择算法](./docs/notes/algorithm/算法基础/选择算法和中位数.md)
+    * [背包问题](./docs/notes/algorithm/forLet_new/backpack.md)
+
   * 算法题解
   
     * [剑指offer题目](./docs/notes/algorithm/forLet_new/剑指Offer.md)
