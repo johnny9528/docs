@@ -15,13 +15,11 @@
     * [动态规划](./docs/notes/algorithm/forLet_new/动态规划.md)
     * [链表操作](./docs/notes/algorithm/forLet_new/链表.md)
     * [二叉树](./docs/notes/algorithm/forLet_new/二叉树.md)
-    * [滑动窗口](./docs/notes/algorithm/forLet_new/滑动窗口.md)
+    * [数组](./docs/notes/algorithm/forLet_new/数组.md)
+    * [字符串](./docs/notes/algorithm/forLet_new/字符串.md)
     * [二分](./docs/notes/algorithm/forLet_new/二分.md)
-    * [双指针](./docs/notes/algorithm/forLet_new/双指针.md)
-    * [深度/广度优先](./docs/notes/algorithm/forLet_new/dfs_bfs.md)
     * [回溯](./docs/notes/algorithm/forLet_new/回溯.md)
-    * [贪心](./docs/notes/algorithm/forLet_new/贪心.md)
-    * [一般问题](./docs/notes/algorithm/forLet_new/general.md)
+    * [其他问题](./docs/notes/algorithm/forLet_new/others.md)
     
 
 
