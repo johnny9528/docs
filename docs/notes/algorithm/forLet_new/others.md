@@ -193,3 +193,53 @@ class Solution {
 }
 ```
 
+
+
+
+
+## 50. 快速幂计算乘方(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/powx-n/)
+
+```
+实现 pow(x, n) ，即计算 x 的 n 次幂函数。
+```
+
+### 实现
+
+快速幂，和除法有类似的地方。可以用递归，可以用迭代
+
+### 实现
+
+```java
+class Solution {
+    public double myPow(double x, int n) {
+ 
+        long count = n;
+        if (n < 0) { // 转化为正数计算
+            count = -(long) n;
+        }
+        double ans = 1.0;
+        double value = x;
+
+        while (count > 0) {
+            if (count % 2 == 1) {
+                ans *= value;
+            }
+            value = value * value;
+
+            count = count / 2;
+        }
+
+
+        if (n >= 0) {
+            return ans;
+        } else {
+            return 1 / ans;
+        }
+    }
+}
+```
+
