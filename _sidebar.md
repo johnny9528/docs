@@ -6,7 +6,7 @@
 
     * [排序算法](./docs/notes/algorithm/算法基础/排序算法.md)
     * [中位数和选择算法](./docs/notes/algorithm/算法基础/选择算法和中位数.md)
-    * [背包问题](./docs/notes/algorithm/forLet_new/backpack.md)
+    * [背包问题](./docs/notes/algorithm/算法基础/backpack.md)
 
   * 算法题解
   
