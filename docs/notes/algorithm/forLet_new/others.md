@@ -295,7 +295,7 @@ class Solution {
 
 
 
-## LRU缓存机制(M)
+## 146. LRU缓存机制(M)
 
 ### 题目描述
 
@@ -444,6 +444,74 @@ class LRUCache {
         node.next.prev = node.prev;
 
         insertToHead(node);
+    }
+}
+
+```
+
+
+
+
+
+## 155. 最小栈(E)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/min-stack/)
+
+```
+设计一个支持 push ，pop ，top 操作，并能在常数时间内检索到最小元素的栈。
+
+push(x) —— 将元素 x 推入栈中。
+pop() —— 删除栈顶的元素。
+top() —— 获取栈顶元素。
+getMin() —— 检索栈中的最小元素。
+```
+
+### 分析
+
+要常数时间内检索到最小元素，那么就一定需要存储当前时刻的最小元素，同时，存储值本身需要一个栈，因此使用两个栈，一个栈存储值，一个存储当前时刻的最小值。
+
+入栈的时候，第一步将值入保存值的栈，然后存储最小值的栈的栈顶是之前的最小元素，那么与这一次的值相比，谁小，则将这个值入最小值栈。
+
+出栈的时候，只需要将两个栈顶的元素弹出即可。
+
+### 实现
+
+```java
+class MinStack {
+
+    Deque<Integer> value_stack;
+    Deque<Integer> min_stack;
+
+    /** initialize your data structure here. */
+    public MinStack() {
+        value_stack = new LinkedList<>();
+        min_stack = new LinkedList<>();
+        min_stack.offerLast(Integer.MAX_VALUE); // 初始化，将最大值加进去，避免需要判空
+    }
+    
+    public void push(int x) {
+
+        value_stack.offerLast(x); // 先加入到 value_stack
+        int currentMin = min_stack.getLast();
+
+        min_stack.offerLast(Math.min(currentMin, x)); // 将此刻的最小值加入到 min_stack
+
+    }
+    
+    public void pop() {
+        // 将两个栈顶弹出即可
+        value_stack.pollLast();
+        min_stack.pollLast();
+    }
+    
+    public int top() {
+        return value_stack.getLast();
+    }
+    
+    public int getMin() {
+        return min_stack.getLast();
     }
 }
 
