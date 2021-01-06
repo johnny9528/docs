@@ -1,5 +1,11 @@
 # 其他问题
 
+```
+229   
+```
+
+
+
 ## 7. 整数反转
 
 ### 题目描述
@@ -515,5 +521,281 @@ class MinStack {
     }
 }
 
+```
+
+
+
+
+
+## 201. 数字范围按位与(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/bitwise-and-of-numbers-range/)
+
+```
+给定范围 [m, n]，其中 0 <= m <= n <= 2147483647，返回此范围内所有数字的按位与（包含 m, n 两端点）。
+输入: [5,7]
+输出: 4
+```
+
+### 分析
+
+数据范围太大，不能直接枚举所有的情况。
+
+最终的结果其实就是 m 和 n 这两个二进制的公共前缀。后面的位都是0。因为如果m和n的某一个位不相同的话，因为是整个范围的按位与，那么这个范围内，一定在这一位上至少有一个0，一旦有一个0，那么与操作的结果就是0。因此，需要寻找最长的公共前缀。使用位移操作即可。
+
+### 实现
+
+```java
+class Solution {
+    public int rangeBitwiseAnd(int m, int n) {
+        int count = 0;
+
+        while (m != n) {
+            m = m >> 1;
+            n = n >> 1;
+            count += 1;
+        }
+
+        return m << count;
+    }
+}
+```
+
+
+
+
+
+## 202. 快乐数(E)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/happy-number/)
+
+```
+编写一个算法来判断一个数 n 是不是快乐数。
+
+「快乐数」定义为：对于一个正整数，每一次将该数替换为它每个位置上的数字的平方和，然后重复这个过程直到这个数变为 1，也可能是 无限循环 但始终变不到 1。如果 可以变为  1，那么这个数就是快乐数。
+如果 n 是快乐数就返回 True ；不是，则返回 False 。
+
+输入：19
+输出：true
+解释：
+12 + 92 = 82
+82 + 22 = 68
+62 + 82 = 100
+12 + 02 + 02 = 1
+```
+
+### 分析
+
+一直计算，如果遇到1，则是快乐数，如果不是快乐数，那么一定会遇到环，即之前计算过的数字。因为如果数字超过三位数，那么经过计算，最终一定会降到三位数及其以下，充其量，三位数枚举完，因此如果不是快乐数，一定会遇到环。
+
+基于上述前提，可以一直计算，模拟这个过程，并用`set`记录已经计算过的值，遇到环或者遇到1则返回对应结果。
+
+方法2，是不用`set`，利用判断链表中是否有环的思路，使用快慢指针进行判断
+
+### 实现
+
+```java
+class Solution {
+    public boolean isHappy(int n) {
+        int slow = n;
+        int fast = getNext(n);
+
+        // 检测链表是否有环的思路，来检测快乐数是否有环
+        while (fast != slow && fast != 1 && slow != 1) {
+            slow = getNext(slow);
+            fast = getNext(getNext(fast));
+        }
+
+        return fast == 1 || slow == 1;
+    }
+
+
+    // 计算下一个值
+    private int getNext(int n) {
+        int ans = 0;
+
+        while (n > 0) {
+            int extra = n % 10;
+            ans += extra * extra;
+            n = n / 10;
+        }
+
+        return ans;
+    }
+}
+```
+
+
+
+
+
+## 204. 小于n的质数的个数(E)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/count-primes/)
+
+```
+统计所有小于非负整数 n 的质数的数量
+输入：n = 10
+输出：4
+解释：小于 10 的质数一共有 4 个, 它们是 2, 3, 5, 7 。
+```
+
+### 分析
+
+枚举所有值并判断是否是质数，复杂度太高。
+
+使用一个额外的数组，如果某个数是质数，那么其 2 倍，3倍数...... 则都不是质数。那么从2开始，2是质数，然后去计算2的2倍，3倍......，这些值都不是质数，然后继续从3开始，算3的倍数。
+
+可以优化，计算数字 `i`，的时候，在 `i * i`之前的倍数，都已经被计算过了。
+
+### 实现
+
+```java
+class Solution {
+    public int countPrimes(int n) {
+
+        boolean[] isPrime = new boolean[n + 1];
+        Arrays.fill(isPrime, true);  // 先将所有值都设置位 true, 即默认都是质数
+        int ans = 0;
+
+        for (int i = 2; i < n; i++) {
+            if (isPrime[i] == false) {
+                // 不是质数，不用继续了
+                continue;
+            }
+
+            ans += 1;  // 这个数是质数
+
+            if ((long) i * i < n) {
+                for (int j = i * i; j <= n; j += i) {  // 将他的倍数都设置位 不是质数
+                    isPrime[j] = false;  
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+ 
+
+
+
+## 225. 用队列实现栈(E)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/implement-stack-using-queues/)
+
+```
+使用队列实现栈的下列操作：
+
+push(x) -- 元素 x 入栈
+pop() -- 移除栈顶元素
+top() -- 获取栈顶元素
+empty() -- 返回栈是否为空
+
+```
+
+### 分析
+
+假设之前有 `1 2 3 4 5`已经入栈了. 现在要将 6入栈，但是直接加入到队列尾部是  `6 1 2 3 4 5`, 因此需要将之前的全部拿出来从新放进去。
+
+* 先将 6放到尾巴， 即 `6 1 2 3 4 5`
+* 然后依次取出 `5 4 3 2 1`加到尾巴， 即 `1 2 3 4 5 6`
+* 结束
+
+### 实现
+
+```java
+class MyStack {
+
+    Queue<Integer> queue;
+
+    /** Initialize your data structure here. */
+    public MyStack() {
+        queue = new LinkedList<>();
+    }
+    
+    /** Push element x onto stack. */
+    public void push(int x) {
+
+        int count = queue.size();  // 之前的个数
+        queue.offer(x);
+
+        for (int i = 1; i <= count; i++) {
+            queue.offer(queue.poll());  // 把之前的全部拿出来，再放到尾部
+        }
+
+
+    }
+    
+    /** Removes the element on top of the stack and returns that element. */
+    public int pop() {
+        return queue.poll();
+    }
+    
+    /** Get the top element. */
+    public int top() {
+        return queue.peek();
+    }
+    
+    /** Returns whether the stack is empty. */
+    public boolean empty() {
+        return queue.isEmpty();
+    }
+}
+
+```
+
+
+
+
+
+## 231. 2的幂(E)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/power-of-two/)
+
+```
+给定一个整数，编写一个函数来判断它是否是 2 的幂次方。
+```
+
+### 分析
+
+2的幂指数，二进制中只有一个1，因此使用位移操作判断即可
+
+### 实现
+
+```java
+class Solution {
+    public boolean isPowerOfTwo(int n) {
+
+        // 只有一位是1，其他都是0
+        int countOne = 0;
+        while (n != 0) {
+            if ((n & 1) == 1) {
+                // 这一位是1
+                countOne += 1;
+            }
+
+            if (countOne > 1) {
+                return false;
+            }
+
+            n = n >> 1;
+        }
+
+        return countOne == 1;
+    }
+}
 ```
 
