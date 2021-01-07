@@ -1,7 +1,7 @@
 # 其他问题
 
 ```
-229   
+229     315  331  334
 ```
 
 
@@ -795,6 +795,87 @@ class Solution {
         }
 
         return countOne == 1;
+    }
+}
+```
+
+
+
+
+
+## 347. 前K个高频元素(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/top-k-frequent-elements/)
+
+```
+给定一个非空的整数数组，返回其中出现频率前 k 高的元素。
+输入: nums = [1,1,1,2,2,3], k = 2
+输出: [1,2]
+```
+
+### 分析
+
+和计算前K大的没啥大区别。当统计词频之后就转化为了这个问题。采用快速排序。
+
+### 实现
+
+```java
+class Solution {
+    public int[] topKFrequent(int[] nums, int k) {
+        Map<Integer, Integer> map = new HashMap<>();
+        // 统计词频
+        for (int num : nums) {
+            map.put(num, map.getOrDefault(num, 0) + 1);
+        }
+
+        List<int[]> list = new ArrayList<>(map.size());
+        for (int key : map.keySet()) {
+            list.add(new int[] {key, map.get(key)});
+        }
+
+        // 快速排序 寻找 topK
+        quickSortForTopK(list, 0, list.size() - 1, k);
+
+        int[] ans = new int[k];
+        for (int i =1; i <= k; i++) {
+            ans[i - 1] = list.get(list.size() - i)[0];
+        }
+        return  ans;
+    }
+
+    private void quickSortForTopK(List<int[]> list, int startIndex, int endIndex, int k) {
+        if (startIndex >= endIndex) {
+            return;
+        }
+
+        int key = list.get(startIndex)[1];
+
+        int left = startIndex;
+        int right = endIndex;
+
+        while (left < right) {
+
+            while (left < right && list.get(right)[1] >= key) {
+                right -= 1;
+            }
+            Collections.swap(list, left, right);
+
+            while (left < right && list.get(left)[1] <= key) {
+                left += 1;
+            }
+            Collections.swap(list, left, right);
+        }
+
+               // 一趟快排结束
+        if (list.size() - left == k) {
+            return;
+        } else if (k < list.size() - left) {
+            quickSortForTopK(list, left + 1, endIndex, k);
+        } else {
+            quickSortForTopK(list, startIndex, left - 1, k);
+        }
     }
 }
 ```
