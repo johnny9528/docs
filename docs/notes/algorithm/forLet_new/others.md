@@ -1,7 +1,7 @@
 # 其他问题
 
 ```
-229     315  331  334
+229     315  331  334  373
 ```
 
 
@@ -878,5 +878,146 @@ class Solution {
         }
     }
 }
+```
+
+
+
+
+
+## 386. 字典序排数字(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/lexicographical-numbers/)
+
+```
+给定一个整数 n, 返回从 1 到 n 的字典顺序。
+例如，
+给定 n =1 3，返回 [1,10,11,12,13,2,3,4,5,6,7,8,9] 。
+
+请尽可能的优化算法的时间复杂度和空间复杂度。 输入的数据 n 小于等于 5,000,000。
+
+```
+
+### 分析
+
+数据太大，肯定不能使用排序。
+
+这道题实际上是类似于一个 10叉树的前序遍历。
+
+```2
+            1    2   ...   9
+           /|\ \
+          0 1 2..9
+```
+
+先遍历1， 然后继续1的子树，即再遍历 10，再遍历11， 然后12...19。 然后开始2这个树的遍历
+
+### 实现
+
+```java
+class Solution {
+    public List<Integer> lexicalOrder(int n) {
+        List<Integer> ans = new ArrayList<>(n + 1);
+
+        if (n <= 9) {
+            for (int i = 1; i <= n; i++) {
+                ans.add(i);
+            }
+            return ans;
+        }
+
+        // n 是大于9的
+        for (int i = 1; i <= 9; i++) {
+ 
+            // 类似于10叉树的先序遍历
+            dfs(ans, i, n);
+        }
+
+        return ans;
+    }
+
+    private void dfs(List<Integer> ans, int base, int n) {
+
+        ans.add(base);  // 先将节点加进去，然后依次遍历子树,即先序遍历
+
+        base = base * 10;  // 扩大10倍
+        // 从 0 开始
+        for (int i = 0; i <= 9; i++) {
+            int newBase = base + i;
+            if (newBase > n) {
+                // 已经超过 n 了 
+                return;
+            }
+
+            dfs(ans, newBase, n);  // 先序遍历
+        }
+    }
+
+
+}
+```
+
+
+
+
+
+## 398. 随机数索引(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/random-pick-index/)
+
+```
+给定一个可能含有重复元素的整数数组，要求随机输出给定的数字的索引。 您可以假设给定的数字一定存在于数组中。
+
+注意：
+数组大小可能非常大。 使用太多额外空间的解决方案将不会通过测试。
+
+int[] nums = new int[] {1,2,3,3,3};
+Solution solution = new Solution(nums);
+
+// pick(3) 应该返回索引 2,3 或者 4。每个索引的返回概率应该相等。
+solution.pick(3);
+
+// pick(1) 应该返回 0。因为只有nums[0]等于1。
+solution.pick(1);
+
+```
+
+### 分析
+
+不能使用太多空间，那肯定不能进行统计。
+
+一种思路是，在找索引的时候，来统计需要找的值，然后随机取一个。
+
+另一种思路是，遍历寻找，等于该值的时候，随机，看是否最终选他。并且是等概率的。看代码吧，这种思路，有点特殊，需要注意
+
+### 实现
+
+```java
+class Solution {
+    private int[] nums;
+    public Solution(int[] nums) {
+        this.nums = nums;
+    }
+    
+    public int pick(int target) {
+        int index = 0;
+        int count = 0;
+        for(int i = 0; i < nums.length; i++) {
+            if(nums[i] == target) {
+                count += 1;
+                double ran = Math.random();
+                double temp = (double)1 / count;
+                if(ran <= temp) {
+                    index = i;
+                }
+            }
+        }
+        return index;
+    }
+}
+
 ```
 
