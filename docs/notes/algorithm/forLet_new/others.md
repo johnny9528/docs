@@ -457,6 +457,142 @@ class LRUCache {
 
 
 
+## 460. LFU缓存(H)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/lfu-cache/)
+
+```
+请你为 最不经常使用（LFU）缓存算法设计并实现数据结构。
+实现 LFUCache 类：
+
+LFUCache(int capacity) - 用数据结构的容量 capacity 初始化对象
+int get(int key) - 如果键存在于缓存中，则获取键的值，否则返回 -1。
+void put(int key, int value) - 如果键已存在，则变更其值；如果键不存在，请插入键值对。当缓存达到其容量时，则应该在插入新项之前，使最不经常使用的项无效。在此问题中，当存在平局（即两个或更多个键具有相同使用频率）时，应该去除 最久未使用 的键。
+注意「项的使用次数」就是自插入该项以来对其调用 get 和 put 函数的次数之和。使用次数会在对应项被移除后置为 0 。
+
+进阶：
+
+你是否可以在 O(1) 时间复杂度内执行两项操作？
+```
+
+### 分析
+
+`LFU`意识是最不经常使用，即某个元素，如果使用频率最低，那么如果空间不够了，需要将其删除。因此需要有一个频率的变量。因为都要是常数时间复杂度，只能用 `map`。 很明显，`key`和`value`必须有一个`map`， 因为要常数时间实现删除，因此，必须能直接得到某个元素的频率并且删除，于是用另一个`map`， `key`是频率， 比如 `1, 2, 3, 4...`， 由于受到容量限制，这个频率的个数并不会很大很大，`value`是频率对应的节点们，用一个双向链表进行保存。因为在频率相等的时候，删除哪一个，肯定是删除最早使用那个，因此需要删除头部的元素，需要双向链表保存。
+
+得好好看看这两个缓存算法
+
+### 实现
+
+```java
+class LFUCache {
+
+    class Node {
+        int key;
+        int value;
+        int freq;
+
+        Node(int key, int value, int freq) {
+            this.key = key;
+            this.value = value;
+            this.freq = freq;
+        }
+    }
+
+    private int capacity;
+    private Map<Integer, Node> nodeMap;  // 保存值的map
+    private Map<Integer, LinkedList<Node>> freqMap;  // key 是频率，value是对应频率节点的
+    private int minFreq; // 当前最小的使用频率 
+
+    public LFUCache(int capacity) {
+        this.capacity = capacity;
+        nodeMap = new HashMap<>(capacity);
+        freqMap = new HashMap<>();
+        minFreq = 0;
+    }
+    
+    public int get(int key) {
+        if (capacity == 0) {
+            return -1;
+        }
+
+
+        // get 操作，需要获取值，并且将对应的node的频率 + 1
+        if (nodeMap.containsKey(key) == false) {
+            // 并不存在对应的 key
+            return -1;
+        }
+
+        Node node = nodeMap.get(key);  // 得到对应的节点
+        int freq = node.freq;
+        LinkedList<Node> list = freqMap.get(freq);  // 得到对应的频率链表，一定是存在的 
+
+        // 在链表中删除该节点
+        list.remove(node);
+        // 删除之后，如果这个链表没有元素之后，说明这个频率没有节点了
+        if (list.size() == 0) {
+            freqMap.remove(freq);
+            list = null;
+            if (minFreq == freq) {
+                minFreq += 1;
+            }
+        }
+
+        // freq应该加1,并加入到 freq + 1的链表中
+        node.freq += 1;
+        freq += 1;
+        if (freqMap.containsKey(freq) == false) {
+            freqMap.put(freq, new LinkedList<Node>());
+        }
+        freqMap.get(freq).offerLast(node);
+
+        return node.value;
+    }
+    
+    public void put(int key, int value) {
+        if (capacity == 0) {
+            return;
+        }
+
+
+        // 需要检验是否在里面
+        if (nodeMap.containsKey(key) == false) {
+            // 需要检验是否已经满了
+            if (nodeMap.size() == capacity) {
+                // 说明刚好满了， 需要删除一个 minFreq的节点
+                LinkedList<Node> list = freqMap.get(minFreq);
+                Node node = list.pollFirst(); // 删除第一个节点
+                nodeMap.remove(node.key);
+
+                // 如果删了之后，这个频率没有节点了，需要删除 freqMap中的元素
+                if (list.size() == 0) {
+                    freqMap.remove(node);
+                    list = null;
+                }
+            }
+
+            // 加入元素的频率为1
+            if (freqMap.containsKey(1) == false) {
+                freqMap.put(1, new LinkedList<Node>());
+            }
+            Node newNode = new Node(key, value, 1);
+            freqMap.get(1).offerLast(newNode);
+            nodeMap.put(key, newNode);
+            minFreq = 1;
+        } else {
+            // 在里面，之间更新即可
+            get(key);  // 这一步是为了给使用频率加1， 因为效果其实是一样的
+            nodeMap.get(key).value = value; // 更新节点值
+        }
+
+        
+    }
+}
+```
+
+
+
 
 
 ## 155. 最小栈(E)
@@ -1021,3 +1157,25 @@ class Solution {
 
 ```
 
+
+
+
+
+## 470. 用 `rand7`实现 rand10(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/implement-rand10-using-rand7/)
+
+```
+已有方法 rand7 可生成 1 到 7 范围内的均匀随机整数，试写一个方法 rand10 生成 1 到 10 范围内的均匀随机整数。
+
+不要使用系统的 Math.random() 方法。
+
+```
+
+### 分析
+
+能够随机生成1-7的整数，那么就可以得到随机的1-49的整数。取前40个，然后取余就得到0-9的随机的整数。如果大于40，拒绝，再来一次。
+
+取40， 30， 20， 10 都可以，但是40的拒绝的概率最小的。
