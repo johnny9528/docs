@@ -1179,3 +1179,437 @@ class Solution {
 能够随机生成1-7的整数，那么就可以得到随机的1-49的整数。取前40个，然后取余就得到0-9的随机的整数。如果大于40，拒绝，再来一次。
 
 取40， 30， 20， 10 都可以，但是40的拒绝的概率最小的。
+
+### 实现
+
+```java
+class Solution extends SolBase {
+    public int rand10() {
+        while(true) {
+            int x = rand7();
+            int y = rand7();
+
+            if(x + (y - 1) * 7 <= 40) {
+                return (x + (y - 1) * 7) % 10 + 1;
+            }
+        }
+        
+    }
+}
+```
+
+
+
+
+
+## 622. 设计循环队列(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/design-circular-queue/)
+
+```
+设计你的循环队列实现。 循环队列是一种线性数据结构，其操作表现基于 FIFO（先进先出）原则并且队尾被连接在队首之后以形成一个循环。它也被称为“环形缓冲器”。
+
+循环队列的一个好处是我们可以利用这个队列之前用过的空间。在一个普通队列里，一旦一个队列满了，我们就不能插入下一个元素，即使在队列前面仍有空间。但是使用循环队列，我们能使用这些空间去存储新的值。
+
+你的实现应该支持如下操作：
+
+MyCircularQueue(k): 构造器，设置队列长度为 k 。
+Front: 从队首获取元素。如果队列为空，返回 -1 。
+Rear: 获取队尾元素。如果队列为空，返回 -1 。
+enQueue(value): 向循环队列插入一个元素。如果成功插入则返回真。
+deQueue(): 从循环队列中删除一个元素。如果成功删除则返回真。
+isEmpty(): 检查循环队列是否为空。
+isFull(): 检查循环队列是否已满。
+
+```
+
+### 分析
+
+循环队列，主要是要知道头部在哪，尾巴在哪，以及什么时候是空的，什么时候是满的。
+
+采用数组保存数据，并保存头部和尾巴的索引下标。由于是循环队列，因此，需要在超出边界的时候取余。需要知道什么时候是空什么时候是满的，需要知道当前数据量的大小。
+
+### 实现
+
+```java
+class MyCircularQueue {
+    private int[] nums;
+    private int headIndex; // 头部， 如果没有数据的时候，是个虚拟的头部
+    private int tailIndex; // 尾部
+    int size; // 数据的个数
+    public MyCircularQueue(int k) {
+        nums = new int[k];
+        headIndex = 0;
+        tailIndex = 0;
+        size = 0;
+    }
+    
+    public boolean enQueue(int value) {
+        if (size == nums.length) {
+            // 已经满了
+            return false;
+        } 
+        
+        if (size == 0) {
+            // size = 0， 实际上 头部和尾部是不存在的，即没有意义的
+            nums[tailIndex] = value;
+            headIndex = tailIndex;
+            size = 1;
+        } else {
+            tailIndex += 1; // 尾巴后移一个，并进行赋值
+            if (tailIndex == nums.length) {
+                tailIndex = 0;
+            }
+            nums[tailIndex] = value;
+            size += 1;
+        }
+        return true;
+    }
+    
+    public boolean deQueue() {
+        if (size == 0) {
+            return false;
+        } 
+
+        headIndex += 1; // 出队列是从头部出队列，因此头部后移一个即可
+        if (headIndex == nums.length) {
+            headIndex = 0;
+        }
+        size -= 1;
+        return true;
+    }
+    
+    public int Front() {
+        if (size == 0) {
+            return -1;
+        }
+
+        return nums[headIndex];
+    }
+    
+    public int Rear() {
+        if (size == 0) {
+            return -1;
+        }
+        return nums[tailIndex];
+    }
+    
+    public boolean isEmpty() {
+        return size == 0;
+    }
+    
+    public boolean isFull() {
+        return size == nums.length;
+    }
+}
+
+```
+
+
+
+## 641. 设计循环双端队列(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/design-circular-deque/)
+
+```
+设计实现双端队列。
+你的实现需要支持以下操作：
+
+MyCircularDeque(k)：构造函数,双端队列的大小为k。
+insertFront()：将一个元素添加到双端队列头部。 如果操作成功返回 true。
+insertLast()：将一个元素添加到双端队列尾部。如果操作成功返回 true。
+deleteFront()：从双端队列头部删除一个元素。 如果操作成功返回 true。
+deleteLast()：从双端队列尾部删除一个元素。如果操作成功返回 true。
+getFront()：从双端队列头部获得一个元素。如果双端队列为空，返回 -1。
+getRear()：获得双端队列的最后一个元素。 如果双端队列为空，返回 -1。
+isEmpty()：检查双端队列是否为空。
+isFull()：检查双端队列是否满了。
+
+```
+
+### 分析
+
+和上面一样，无非就是多了个头部插入的操作。
+
+### 实现
+
+```java
+class MyCircularDeque {
+    private int[] nums;
+    private int headIndex;
+    private int tailIndex;
+    private int size;
+    
+    public MyCircularDeque(int k) {
+        nums = new int[k];
+        headIndex = 0;
+        tailIndex = 0;
+        size = 0;
+    }
+    
+    public boolean insertFront(int value) {
+        if (size == nums.length) {
+            // 已经满了
+            return false;
+        }
+        if (size == 0) {
+            // 如果之前为空，那么现在的 head 和 tail实际上是没有意义的
+            nums[headIndex] = value;
+            tailIndex = headIndex;
+            size += 1;
+        } else {
+            headIndex -= 1; // head 前移一个
+            if (headIndex == -1) {
+                headIndex = nums.length - 1;
+            }
+            nums[headIndex] = value;
+            size += 1;
+        }
+        return true;
+       
+    }
+    
+    public boolean insertLast(int value) {
+        if (size == nums.length) {
+            // 已经满了
+            return false;
+        }
+        
+        if (size == 0) {
+            // 现在的 head 和 tail 是没有意义的
+            nums[tailIndex] = value;
+            headIndex = tailIndex;
+            size += 1;
+        } else {
+            tailIndex += 1;
+            if (tailIndex == nums.length) {
+                tailIndex = 0;
+            }
+            nums[tailIndex] = value;
+            size += 1;
+        }
+        return true;
+    }
+    
+    public boolean deleteFront() {
+        if (size == 0) {
+            return false;
+        }
+
+        headIndex += 1;
+        size -= 1;
+        if (headIndex == nums.length) {
+            headIndex = 0;
+        }
+        return true;
+    }
+    
+    public boolean deleteLast() {
+        if (size == 0) {
+            return false;
+        }
+
+        tailIndex -= 1;
+        size -= 1;
+        if (tailIndex == -1) {
+            tailIndex = nums.length - 1;
+        }
+        return true;
+    }
+    
+    public int getFront() {
+        if (size == 0) {
+            return -1;
+        }
+
+        return nums[headIndex];
+    }
+    
+    public int getRear() {
+        if (size == 0) {
+            return -1;
+        }
+
+        return nums[tailIndex];
+
+    }
+    
+    public boolean isEmpty() {
+        return size == 0;
+    }
+    
+    public boolean isFull() {
+        return size == nums.length;
+    }
+}
+
+```
+
+
+
+
+
+## 670. 交换两个位使得数字最大(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/maximum-swap/)
+
+```
+给定一个非负整数，你至多可以交换一次数字中的任意两位。返回你能得到的最大值。
+
+输入: 2736
+输出: 7236
+解释: 交换数字2和数字7。
+
+输入: 9973
+输出: 9973
+解释: 不需要交换。
+```
+
+### 分析
+
+要最大，那么肯定要尝试交换最左边的数字，替换为右边最大的数字。并且注意这种情况， `2991`， 肯定是替换越后面的9才更大，即 `9921 > 9291`.
+
+因此就是先尝试找比第一个数字大的，找不到，去尝试第二位数字，依次类推。为了方便，用数组去保存数字。可以用字符数组，也可以用数字数组。
+
+### 实现
+
+```java
+class Solution {
+    public int maximumSwap(int n) {
+        if (n == 0) {
+            return 0;
+        }
+		
+        // 转化位数组保存
+        int len = ("" + n).length();
+        int[] nums = new int[len];
+        for (int i = len - 1; i >= 0; i--) {
+            nums[i] = n % 10;
+            n = n / 10;
+        }
+
+        for (int i = 0; i < len; i++) {
+            int maxIndex = i; // 找他后面的最大的数字 (相同的话，取越往后的，因此从后往前找)
+            for (int j = len - 1; j >= i + 1; j--) {
+                if (nums[j] > nums[maxIndex]) {
+                    maxIndex = j;
+                }
+            }
+
+            if (maxIndex != i) {
+                // 存在比 i 更大的
+                int temp = nums[i];
+                nums[i] = nums[maxIndex];
+                nums[maxIndex] = temp;
+                break; // 只能换一次，找到了合适的就跳出整个循环
+            }
+        }
+
+        int ans = 0;
+        for (int i = 0; i < len; i++) {
+            ans = ans * 10 + nums[i];
+        }
+        return ans;
+    }
+
+}
+```
+
+
+
+
+
+## 678. 有效的括号字符串(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/valid-parenthesis-string/)
+
+```
+给定一个只包含三种字符的字符串：（ ，） 和 *，写一个函数来检验这个字符串是否为有效字符串。有效字符串具有如下规则：
+
+任何左括号 ( 必须有相应的右括号 )。
+任何右括号 ) 必须有相应的左括号 ( 。
+左括号 ( 必须在对应的右括号之前 )。
+* 可以被视为单个右括号 ) ，或单个左括号 ( ，或一个空字符串。
+一个空字符串也被视为有效字符串。
+
+输入: "(*))"
+输出: True
+```
+
+### 分析
+
+括号匹配，一般都需要栈来辅助。由于有 星号的存在，因此不能只存储左括号的个数。遇到右括号，判断左括号是否存在。如果只保存个数的话，无法确定星号的位置，因为 `(*()`这种字符串，看上去左括号有两个，星号代表右括号的话也是两个，但是时机上是不正确的。因此必须保存左括号和星号的位置信息。
+
+使用两个栈，一个表示左括号的索引，一个表示星号的索引。遍历字符串。
+
+* 如果是左括号，加入到栈
+* 如果是星号，加入到栈
+* 如果是右括号，那么肯定优先匹配左括号,因为星号是万精油，如果左括号的栈不为空，则减少一个，否则只能尝试减少星号，让星号去充当左括号。
+
+流程结束之后，两个栈可能都有剩余。此时星号要不代表右括号，要不代表空值。那么此时并不是星号数量大于左括号数量就合法了，因为还需要位置信息。每一对，左括号的位置必须小于星号的索引。
+
+### 实现
+
+```java
+class Solution {
+    public boolean checkValidString(String s) {
+        if (s == null || s.length() == 0) {
+            return true;
+        }
+        Deque<Integer> leftStack = new LinkedList<>(); // 存放左括号的索引
+        Deque<Integer> starStack = new LinkedList<>(); // 存放 星号的索引
+
+        for (int i = 0; i < s.length(); i++) {
+            
+            char c = s.charAt(i);
+
+            if (c == '(') {
+                // 等于左括号
+                leftStack.offerLast(i);
+            } else if (c == '*') {
+                starStack.offerLast(i);
+            } else {
+                // 是右括号，需要消耗了
+                if (leftStack.size() == 0 && starStack.size() == 0) {
+                    return false;
+                }
+
+                if (leftStack.size() > 0) {
+                    // 有真正的左括号，优先使用
+                    leftStack.pollLast();
+                } else {
+                    starStack.pollLast();
+                }
+            }
+        }
+
+
+        // 最后看两个栈里面剩余的能不能匹配，现在 starStack 中的只能代表右括号或者星号
+        if (leftStack.size() > starStack.size()) {
+            return false;
+        }
+
+        // 现在个数满足，但是不确定里面是否满足
+        while (leftStack.size() > 0 && starStack.size() > 0) {
+            int index1 = leftStack.pollLast();
+            int index2 = starStack.pollLast();
+            if (index1 > index2) {
+                // 如果 index1 的右侧没有 星号来充当 右括号了
+                return false;
+            }
+        }
+
+        return leftStack.size() == 0;
+        
+    }
+}
+```
+
