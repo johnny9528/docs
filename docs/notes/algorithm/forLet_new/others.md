@@ -1,7 +1,7 @@
 # 其他问题
 
 ```
-229     315  331  334  373  801
+229     315  331  334  373  801  890(模式匹配)
 ```
 
 
@@ -1614,4 +1614,212 @@ class Solution {
 ```
 
 
+
+
+
+## 856. 括号的分数(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/score-of-parentheses/)
+
+```
+给定一个平衡括号字符串 S，按下述规则计算该字符串的分数：
+
+() 得 1 分。
+AB 得 A + B 分，其中 A 和 B 是平衡括号字符串。
+(A) 得 2 * A 分，其中 A 是平衡括号字符串。
+
+输入： "(()(()))"
+输出： 6
+(1 + 1 * 2) * 2 = 6
+```
+
+### 分析
+
+用栈进行模拟。栈里面需要保存临时计算的结果，是 `int `， 因此，如果是左括号，可以用`-1`进行标识
+
+* 如果是左括号，左括号进栈, 即 `-1`进栈
+* 如果是右括号， 此时
+  * 如果栈顶是左括号，那么刚好二者匹配，左括号出栈，计算得1，如果此时栈顶是一个数字，那么需要和他合并，加起来，然后把这个结果入栈。 比如 栈里面是 `-1 3 -1`， 此时遇到右括号， 右括号和 `-1`匹配，贡献1， 和 `3`合并，最终得到 `-1 4`
+  * 如果栈顶是数字， 比如 `-1 3 -1 4`， 那么需要这个数字需要乘以2， 再和之前的数字合并，最终得 `-1 11`, 其中 `11 = 4 * 2 + 3`
+* 由于 字符串一定是合法的，那么最终栈里面只会剩下一个值，就是最终的结果。
+
+### 实现
+
+```java
+class Solution {
+    public int scoreOfParentheses(String s) {
+        if (s == null || s.length() == 0) {
+            return 0;
+        } 
+
+        Deque<Integer> stack = new LinkedList<>();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '(') {
+                // 左括号， 进栈， 用 -1 来标识左括号
+                stack.offerLast(-1);
+            } else {
+                // 右括号
+                if (stack.peekLast() == -1) {
+                    // 栈顶是左括号， 能够与之匹配 (由于s 是满足条件的，不可能栈为空)
+                    stack.pollLast(); // 左括号出栈
+                    // 值等于1， 入栈
+                    int num = 1; // 这次计算是1
+                    if (stack.size() > 0 && stack.peekLast() != -1) {
+                        // 需要和之前的计算合并
+                        num += stack.pollLast();
+                    }
+                    // 将本次计算结果入栈
+                    stack.offerLast(num);
+                } else {
+                    // 栈顶是值
+                    int num = stack.pollLast();
+                    // 左右括号将值包在中间，要乘以2
+                    num *= 2;
+                    stack.pollLast(); // 将右括号匹配的左括号出栈
+                    if (stack.size() > 0 && stack.peekLast() != -1) {
+                        // 需要合并
+                        num += stack.pollLast();
+                    }
+                    stack.offerLast(num);
+                }
+            }
+        }
+
+        return stack.peekLast();
+    }
+}
+```
+
+
+
+
+
+## 869. 重新排列得到2的幂(M)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problemset/all/)
+
+```
+给定正整数 N ，我们按任何顺序（包括原始顺序）将数字重新排序，注意其前导数字不能为零。
+
+如果我们可以通过上述方式得到 2 的幂，返回 true；否则，返回 false。
+
+输入：61
+输出：true
+```
+
+### 分析
+
+一种思路是求得左右排列组合的方式，然后判断是否是2的幂。
+
+还有一种更巧妙的方式是，统计词频。因为2的幂指数总共就32个， 可以枚举所有的幂指数，因为不考虑顺序，意思是，只要词频和2的幂指数的词频相等，就可以成功
+
+### 实现
+
+```java
+class Solution {
+    public boolean reorderedPowerOf2(int N) {
+
+        int[] base = getCount(N);  // 统计词频， 统计每个数字的个数
+
+        for (int i = 0; i < 32; i++) {
+            int x = 1 << i; // 2 的 幂
+
+            int[] temp = getCount(x); // 统计每一个 2的幂 的词频
+
+            if (Arrays.equals(base, temp) == true) { // 词频是否是相同的
+                // 组合是相等的
+                return true;
+            }
+        }
+        return false;
+    }
+	
+    // 统计词频， 即0-9的个数
+    private int[] getCount(int n) {
+        int[] ans = new int[10];
+
+        while (n > 0) {
+            ans[n % 10] += 1;
+            n = n / 10;
+        }
+        return ans;
+    }
+}
+```
+
+
+
+
+
+## 895. 最大频率栈(H)
+
+### 题目描述
+
+[链接](https://leetcode-cn.com/problems/maximum-frequency-stack/)
+
+```
+实现 FreqStack，模拟类似栈的数据结构的操作的一个类。
+
+FreqStack 有两个函数：
+
+push(int x)，将整数 x 推入栈中。
+pop()，它移除并返回栈中出现最频繁的元素。
+如果最频繁的元素不只一个，则移除并返回最接近栈顶的元素。
+
+```
+
+### 分析
+
+要存储频率，先肯定需要一个`freqMap`来保存数据和个数的映射。因为设计到最大频率，和 `RFU`类似，需要一个 频率到栈的`map`。并需要保存当前的最大频率，才能直接定位到应该删除元素的地方。
+
+### 实现
+
+```java
+class FreqStack {
+    Map<Integer, Integer> freqMap;
+
+    Map<Integer, Deque<Integer>> group;  // key 是频率， value 是对应的栈，里面保存当前频率的元素
+    int maxFreq; // 最大频率
+
+    public FreqStack() {
+        freqMap = new HashMap<>();
+        group = new HashMap<>();
+        maxFreq = 0;
+    }
+    
+    public void push(int x) {
+        freqMap.put(x, freqMap.getOrDefault(x, 0) + 1); // 频率 加 1
+        int f = freqMap.get(x);
+
+        if (f > maxFreq) {
+            // 需要更新 maxFreq
+            maxFreq = f;  
+        } 
+
+        Deque<Integer> stack = group.get(f); // 得到对应的栈
+        if (stack == null) {
+            stack = new LinkedList<>();
+        }
+        stack.offerLast(x); // 将 x 压栈
+        group.put(f, stack);
+    }
+    
+    public int pop() {
+        Deque<Integer> stack = group.get(maxFreq);
+        int x = stack.pollLast(); // 出栈
+        freqMap.put(x, freqMap.get(x) - 1); // 频率 减 1
+        if (stack.size() == 0) {
+            group.remove(maxFreq); // 如果 栈为空，对应的最大频率要减1， 同时删除对应的栈(也可以不删，删了应该方便gc吧)
+            maxFreq -= 1;
+        }
+        return x;
+    }
+}
+
+```
 
